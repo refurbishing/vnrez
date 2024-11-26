@@ -41,9 +41,9 @@ Go to your prefered terminal and execute this command depending on your Distro.
  </details>
 
 ## Installation
-<!--
-[![vnrez](https://img.shields.io/badge/AVAILABLE_ON_THE_AUR-333232?style=for-the-badge&logo=arch-linux&logoColor=3d67db&labelColor=%23171717)](https://aur.archlinux.org/packages/vnrez) 
--->
+
+[![vnrez](https://img.shields.io/badge/AVAILABLE_ON_THE_AUR-333232?style=for-the-badge&logo=arch-linux&logoColor=3d67db&labelColor=%23171717)](https://aur.archlinux.org/packages/vnrez)
+
 
 ```bash
 git clone https://github.com/verysillycat/vnrez
@@ -65,6 +65,12 @@ Now paste that API KEY when doing the initial setup.
 - `config` open the configuration file in the default text editor
 - `reinstall` reinstall the configuration file with default settings
 
+### Screenshot
+ <small><strong>case: shot</strong></small>
+- `--gui` select a region to screenshot
+- `--full` full screen screenshot of every monitor
+- `--screen` full screen screenshot
+
 ### Recording
  <small><strong>case: record</strong></small>
 - `--abort` abort recording and the upload
@@ -74,11 +80,6 @@ Now paste that API KEY when doing the initial setup.
 - `--gif` snip with gif output
 
 ##### ★ When using Kooha, you'll not see some of these arguments as they aren't needed.
-
-### Screenshot
- <small><strong>case: shot</strong></small>
-- `--gui` select a region to screenshot
-- `--full` full screen screenshot
 
 ## Configuration
 

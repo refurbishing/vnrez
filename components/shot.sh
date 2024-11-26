@@ -27,12 +27,12 @@ if [[ -z "$1" || "$1" == "--gui" ]]; then
             ags run-js "closeEverything();" >/dev/null 2>&1
         fi
     fi
-    wait
 elif [[ "$1" == "--full" ]]; then
+    flameshot full -r > $temp_file &
+elif [[ "$1" == "--screen" ]]; then
     flameshot screen -r > $temp_file &
-    wait
 fi
-
+wait
 
 if [[ $(file --mime-type -b $temp_file) != "image/png" ]]; then
     rm $temp_file
