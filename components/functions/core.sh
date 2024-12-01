@@ -29,8 +29,8 @@ upload_video() {
 
 	if [[ "$service" == "none" ]]; then
 		if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-		file_path=$(realpath "$file")
-			 echo -n "file://$file_path" | wl-copy -t text/uri-list
+			file_path=$(realpath "$file")
+			echo -n "file://$file_path" | wl-copy -t text/uri-list
 		else
 			file_path=$(realpath "$file")
 			echo -n "file://$file_path" | xclip -selection clipboard -t text/uri-list
@@ -118,63 +118,63 @@ upload_video() {
 }
 
 upload_kooha() {
-    if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
-        last_upload_time=$(cat "$(eval echo $kooha_last_time)" 2>/dev/null || echo 0)
-        new_files=$(find "$(eval echo $kooha_dir)" -type f -newer "$(eval echo $kooha_last_time)" | sort -n)
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+		last_upload_time=$(cat "$(eval echo $kooha_last_time)" 2>/dev/null || echo 0)
+		new_files=$(find "$(eval echo $kooha_dir)" -type f -newer "$(eval echo $kooha_last_time)" | sort -n)
 
-        if [[ -z "$new_files" ]]; then
-           echo "INFO: No new recordings found."
-		   echo "NOTE: If you recorded something in Kooha before closing, and the recording doesn't try to upload,"
-		   echo "      then Kooha's directory location might be mismatched with the config's kooha directory."
-        fi
+		if [[ -z "$new_files" ]]; then
+			echo "INFO: No new recordings found."
+			echo "NOTE: If you recorded something in Kooha before closing, and the recording doesn't try to upload,"
+			echo "      then Kooha's directory location might be mismatched with the config's kooha directory."
+		fi
 
-        file_count=0
-        for file_path in $new_files; do
-            let file_count=file_count+1
-            if [[ -f "$file_path" && -s "$file_path" ]]; then
-                if [[ "$colorworkaround" == true && "${file_path##*.}" != "gif" ]]; then
-                    post_process_video "$file_path"
-                fi
+		file_count=0
+		for file_path in $new_files; do
+			let file_count=file_count+1
+			if [[ -f "$file_path" && -s "$file_path" ]]; then
+				if [[ "$colorworkaround" == true && "${file_path##*.}" != "gif" ]]; then
+					post_process_video "$file_path"
+				fi
 
-                if [[ -f "$file_path" ]]; then
-                    if [[ "$1" == "--gif" || "${file_path##*.}" == "gif" ]]; then
-                        gif_file=$(gif "$file_path")
-                        upload_video "$gif_file" "--gif"
-                    else
-                        upload_video "$file_path"
-                    fi
+				if [[ -f "$file_path" ]]; then
+					if [[ "$1" == "--gif" || "${file_path##*.}" == "gif" ]]; then
+						gif_file=$(gif "$file_path")
+						upload_video "$gif_file" "--gif"
+					else
+						upload_video "$file_path"
+					fi
 
-                    if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
-                        notify-send -i link "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
-                    fi
-                else
-                    echo "Error: Encoded file not found: $file_path"
-                    notify-send "Error: Encoded file not found: $file_path" -a "VNREZ Recorder"
-                fi
-            fi
+					if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
+						notify-send -i link "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
+					fi
+				else
+					echo "Error: Encoded file not found: $file_path"
+					notify-send "Error: Encoded file not found: $file_path" -a "VNREZ Recorder"
+				fi
+			fi
 
-            if ((file_count % 2 == 0)); then
-                sleep 2
-            fi
-        done
+			if ((file_count % 2 == 0)); then
+				sleep 2
+			fi
+		done
 
-        if [[ $(echo $new_files | wc -w) -eq 1 ]]; then
-            if [[ "$1" == "--gif" || "${file_path##*.}" == "gif" ]]; then
-                notify-send -i link "GIF URL copied to clipboard" -a "VNREZ Recorder"
-            else
-                notify-send -i link "Video URL copied to clipboard" -a "VNREZ Recorder"
-            fi
-        fi
+		if [[ $(echo $new_files | wc -w) -eq 1 ]]; then
+			if [[ "$1" == "--gif" || "${file_path##*.}" == "gif" ]]; then
+				notify-send -i link "GIF URL copied to clipboard" -a "VNREZ Recorder"
+			else
+				notify-send -i link "Video URL copied to clipboard" -a "VNREZ Recorder"
+			fi
+		fi
 
-        rm "$(eval echo $kooha_last_time)"
-    fi
+		rm "$(eval echo $kooha_last_time)"
+	fi
 
-    if [[ "$save" == false ]]; then
-        recording_count=$(find "$(eval echo $kooha_dir)" -type f \( -name "*.mp4" -o -name "*.webm" -o -name "*.mkv" -o -name "*.gif" \) | wc -l)
-        if ((recording_count <= 1)); then
-            rm -rf "$(eval echo $kooha_dir)"
-        fi
-    fi
+	if [[ "$save" == false ]]; then
+		recording_count=$(find "$(eval echo $kooha_dir)" -type f \( -name "*.mp4" -o -name "*.webm" -o -name "*.mkv" -o -name "*.gif" \) | wc -l)
+		if ((recording_count <= 1)); then
+			rm -rf "$(eval echo $kooha_dir)"
+		fi
+	fi
 }
 
 abort_upload() {
@@ -219,7 +219,7 @@ abort_upload() {
 				rm "$(eval echo $HOME/.config/vnrez/.upload.lck)"
 			fi
 			if [[ "$service" == "none" ]]; then
-			[[ "$endnotif" == true ]] && notify-send "Recording Aborted" "The Recording has been aborted." -a "VNREZ Recorder"
+				[[ "$endnotif" == true ]] && notify-send "Recording Aborted" "The Recording has been aborted." -a "VNREZ Recorder"
 			else
 				[[ "$endnotif" == true ]] && notify-send "Recording(s) Aborted" "The upload has been aborted." -a "VNREZ Recorder"
 			fi
@@ -246,58 +246,57 @@ upload_shot() {
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "Authorization: "$auth -w "%{http_code}" -o $response -s "$url")
 	fi
 
-if [[ "$service" == "e-z" ]]; then
-    success=$(cat /tmp/upload.json | jq -r ".success")
-    if [[ "$success" != "true" ]] || [[ "$success" == "null" ]]; then
-        error=$(cat /tmp/upload.json | jq -r ".error")
-        if [[ "$error" == "null" ]]; then
-            notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
-            rm $temp_file
-            exit 1
-        else
-            notify-send "Error: $error" -a "Flameshot"
-            rm $temp_file
-            exit 1
-        fi
-    fi
-fi
+	if [[ "$service" == "e-z" ]]; then
+		success=$(cat /tmp/upload.json | jq -r ".success")
+		if [[ "$success" != "true" ]] || [[ "$success" == "null" ]]; then
+			error=$(cat /tmp/upload.json | jq -r ".error")
+			if [[ "$error" == "null" ]]; then
+				notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
+				rm $temp_file
+				exit 1
+			else
+				notify-send "Error: $error" -a "Flameshot"
+				rm $temp_file
+				exit 1
+			fi
+		fi
+	fi
 
-if [[ ! "$service" == "e-z" ]]; then
-    if ! jq -e . >/dev/null 2>&1 < $response; then
-        notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
-        rm $temp_file
-        exit 1
-    fi
-fi
+	if [[ ! "$service" == "e-z" ]]; then
+		if ! jq -e . >/dev/null 2>&1 <$response; then
+			notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
+			rm $temp_file
+			exit 1
+		fi
+	fi
 
-http_code="${upload_image: -3}"
+	http_code="${upload_image: -3}"
 
-if [[ "$http_code" -ne 200 ]]; then
-    error_message=$(cat $response | jq -r .error)
-    if [[ "$error_message" == "null" ]]; then
-        if [[ "$service" == "e-z" || "$service" == "nest" ]]; then
-            notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
-        fi
-    else
-        notify-send "$error_message" -a "Flameshot"
-    fi
-    rm $temp_file
-    exit 1
-else
-    if [[ "$service" == "e-z" ]]; then
-        image_url=$(cat $response | jq -r .imageUrl)
-    elif [[ "$service" == "nest" ]]; then
-        image_url=$(cat $response | jq -r .fileURL)
-    fi
-    if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-        echo $image_url | wl-copy
-    else
-        echo $image_url | xclip -sel c
-    fi
-	notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
-fi
+	if [[ "$http_code" -ne 200 ]]; then
+		error_message=$(cat $response | jq -r .error)
+		if [[ "$error_message" == "null" ]]; then
+			if [[ "$service" == "e-z" || "$service" == "nest" ]]; then
+				notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
+			fi
+		else
+			notify-send "$error_message" -a "Flameshot"
+		fi
+		rm $temp_file
+		exit 1
+	else
+		if [[ "$service" == "e-z" ]]; then
+			image_url=$(cat $response | jq -r .imageUrl)
+		elif [[ "$service" == "nest" ]]; then
+			image_url=$(cat $response | jq -r .fileURL)
+		fi
+		if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
+			echo $image_url | wl-copy
+		else
+			echo $image_url | xclip -sel c
+		fi
+		notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
+	fi
 }
-
 
 post_process_video() {
 	local input_file=$1

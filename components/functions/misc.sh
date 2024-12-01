@@ -1,13 +1,13 @@
 help() {
 	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
 		echo "Usage: vnrez(.sh) [CASE] [ARGUMENTS]"
-        echo ""
-        echo "OPTIONS:"
-        echo "  --help                 Show this help message and exit"
-        echo "  config                 Open the configuration file in the default text editor"
+		echo ""
+		echo "OPTIONS:"
+		echo "  --help                 Show this help message and exit"
+		echo "  config                 Open the configuration file in the default text editor"
 		echo "  reinstall              Reinstall the configuration file with default settings"
 		echo "  upload, -u             Upload specified video files (mp4, mkv, webm, gif)"
-        echo ""
+		echo ""
 		echo "shot"
 		echo "  --gui                  Make a selection screenshot"
 		echo "  --full                 Make a fullscreen screenshot of all monitors"
@@ -22,34 +22,34 @@ help() {
 		exit 0
 	fi
 
-if [[ "$XDG_SESSION_TYPE" == "wayland" && "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" ]]; then
-	echo "Usage: vnrez(.sh) [CASE] [ARGUMENTS]"
-	echo ""
-    echo "OPTIONS:"
-    echo "  --help, -h             Show this help message and exit"
-	echo "  config                 Open the configuration file in the default text editor"
-	echo "  reinstall              Reinstall the configuration file with default settings"
-	echo "  upload, -u             Upload specified video files (mp4, mkv, webm, gif)"
-    echo ""
-	echo "shot"
-	echo "  --gui                  Make a selection screenshot"
-	echo "  --full                 Make a fullscreen screenshot of all monitors"
-	echo "  --screen               Make a screenshot of the current screen"
-	echo ""
-    echo "record"
-	echo "  --sound                Record a selected region with sound"
-	echo "  --fullscreen-sound     Record the entire screen with sound"
-	echo "  --fullscreen           Record the entire screen without sound"
-	echo "  --no-sound, (none)     Record a selected region without sound"
-	echo "  --gif                  Record a selected region and convert to GIF"
-	echo "  --abort                Abort the current recording"
-	echo ""
-	exit 0
-fi
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" ]]; then
+		echo "Usage: vnrez(.sh) [CASE] [ARGUMENTS]"
+		echo ""
+		echo "OPTIONS:"
+		echo "  --help, -h             Show this help message and exit"
+		echo "  config                 Open the configuration file in the default text editor"
+		echo "  reinstall              Reinstall the configuration file with default settings"
+		echo "  upload, -u             Upload specified video files (mp4, mkv, webm, gif)"
+		echo ""
+		echo "shot"
+		echo "  --gui                  Make a selection screenshot"
+		echo "  --full                 Make a fullscreen screenshot of all monitors"
+		echo "  --screen               Make a screenshot of the current screen"
+		echo ""
+		echo "record"
+		echo "  --sound                Record a selected region with sound"
+		echo "  --fullscreen-sound     Record the entire screen with sound"
+		echo "  --fullscreen           Record the entire screen without sound"
+		echo "  --no-sound, (none)     Record a selected region without sound"
+		echo "  --gif                  Record a selected region and convert to GIF"
+		echo "  --abort                Abort the current recording"
+		echo ""
+		exit 0
+	fi
 }
 
 logo() {
-    cat << "EOF"
+	cat <<"EOF"
                                                    
                                                    
  ███     ███ ███ ███   ██ ████    ███     █████ ███
@@ -63,7 +63,7 @@ EOF
 }
 
 logo_setup() {
-    cat << "EOF"         
+	cat <<"EOF"
                                           
 ▄▄▄▄ ▄▄▄ ▄▄ ▄▄▄   ▄▄▄ ▄▄    ▄▄▄▄  ▄▄▄▄▄▄  
  ▀█▄  █   ██  ██   ██▀ ▀▀ ▄█▄▄▄██ ▀  ▄█▀  
@@ -100,7 +100,7 @@ get_name() {
 }
 
 handle_resize() {
-    tput clear
-    prev_rows=$(tput lines)
-    prev_cols=$(tput cols)
+	tput clear
+	prev_rows=$(tput lines)
+	prev_cols=$(tput cols)
 }

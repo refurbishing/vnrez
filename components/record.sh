@@ -10,7 +10,7 @@ check_root
 check_variables
 
 if [[ "$1" == "--help" || "$1" == "-h" ]]; then
-    help
+	help
 fi
 
 getdate() {
@@ -38,20 +38,20 @@ gif() {
 	echo "$gif_file"
 }
 
-if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" && 
-      ("$XDG_CURRENT_DESKTOP" == "GNOME" || 
-       "$XDG_CURRENT_DESKTOP" == "KDE" || 
-       "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
-    mkdir -p "$(eval echo $directory)"
-    cd "$(eval echo $directory)" || exit
+if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" &&
+	("$XDG_CURRENT_DESKTOP" == "GNOME" ||
+	"$XDG_CURRENT_DESKTOP" == "KDE" ||
+	"$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+	mkdir -p "$(eval echo $directory)"
+	cd "$(eval echo $directory)" || exit
 else
-    if [[ "$service" == none ]]; then
+	if [[ "$service" == none ]]; then
 		find /tmp/temp -maxdepth 0 -type d -ctime +1 -exec rm -rf {} \;
 		mkdir -p /tmp/temp
 		cd /tmp/temp || exit
-    else
-        cd /tmp || exit
-    fi
+	else
+		cd /tmp || exit
+	fi
 fi
 
 if [[ "$1" == "--abort" ]]; then
@@ -137,7 +137,6 @@ fi
 if [[ "$1" == "--gif" ]]; then
 	touch "$gif_pending_file"
 fi
-
 
 get_recorder_command() {
 	if [[ "$wlscreenrec" == true ]]; then
@@ -352,13 +351,13 @@ else
 				elif [[ "$1" == "--gif" ]]; then
 					touch "$gif_pending_file"
 					[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
-						region=$(slurp)
-						if [[ -z "$region" ]]; then
-							notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
-							exit 1
-						fi
-						"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
-						disown
+					region=$(slurp)
+					if [[ -z "$region" ]]; then
+						notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
+						exit 1
+					fi
+					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
+					disown
 				else
 					if [[ -z "$1" || "$1" == "--no-sound" ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
