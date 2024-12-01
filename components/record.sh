@@ -138,23 +138,6 @@ if [[ "$1" == "--gif" ]]; then
 	touch "$gif_pending_file"
 fi
 
-acquire_lock() {
-	if [[ -f "$lockfile" ]]; then
-		other_pid=$(cat "$lockfile")
-		if kill -0 "$other_pid" 2>/dev/null; then
-			echo "Another instance of slurp or slop is already running."
-			exit 1
-		else
-			echo $$ >"$lockfile"
-		fi
-	else
-		echo $$ >"$lockfile"
-	fi
-}
-
-release_lock() {
-	rm -f "$lockfile"
-}
 
 get_recorder_command() {
 	if [[ "$wlscreenrec" == true ]]; then
@@ -198,8 +181,6 @@ else
 			fi
 		else
 			if [[ "$1" == "--sound" ]]; then
-				acquire_lock
-				trap release_lock EXIT
 				[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 				region=$(slop -f "%x,%y %w,%h")
 				if [[ -z "$region" ]]; then
@@ -209,8 +190,6 @@ else
 				IFS=', ' read -r x y width height <<<"$region"
 				ffmpeg -video_size "${width}x${height}" -framerate $fps -f x11grab -i $DISPLAY+"${x},${y}" -f pulse -i "$(getaudiooutput)" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart -c:a aac -b:a 128k './recording_'"$(getdate)"'.mp4' &
 				disown
-				release_lock
-				trap - EXIT
 			elif [[ "$1" == "--fullscreen-sound" ]]; then
 				if [[ "$save" == true ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
@@ -229,8 +208,6 @@ else
 				disown
 			elif [[ "$1" == "--gif" ]]; then
 				touch "$gif_pending_file"
-				acquire_lock
-				trap release_lock EXIT
 				[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 				region=$(slop -f "%x,%y %w,%h")
 				if [[ -z "$region" ]]; then
@@ -240,11 +217,7 @@ else
 				IFS=', ' read -r x y width height <<<"$region"
 				ffmpeg -video_size "${width}x${height}" -framerate $fps -f x11grab -i $DISPLAY+"${x},${y}" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart './recording_'"$(getdate)"'.mp4' &
 				disown
-				release_lock
-				trap - EXIT
 			else
-				acquire_lock
-				trap release_lock EXIT
 				[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 				region=$(slop -f "%x,%y %w,%h")
 				if [[ -z "$region" ]]; then
@@ -254,8 +227,6 @@ else
 				IFS=', ' read -r x y width height <<<"$region"
 				ffmpeg -video_size "${width}x${height}" -framerate $fps -f x11grab -i $DISPLAY+"${x},${y}" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart './recording_'"$(getdate)"'.mp4' &
 				disown
-				release_lock
-				trap - EXIT
 			fi
 		fi
 	else
@@ -283,8 +254,6 @@ else
 		else
 			if [[ "$wlscreenrec" == true ]]; then
 				if [[ "$1" == "--sound" ]]; then
-					acquire_lock
-					trap release_lock EXIT
 					[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
 					if [[ -z "$region" ]]; then
@@ -298,8 +267,6 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-					release_lock
-					trap - EXIT
 				elif [[ "$1" == "--fullscreen-sound" ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
@@ -328,8 +295,6 @@ else
 					disown
 				elif [[ "$1" == "--gif" ]]; then
 					touch "$gif_pending_file"
-					acquire_lock
-					trap release_lock EXIT
 					[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
 					if [[ -z "$region" ]]; then
@@ -343,11 +308,7 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-					release_lock
-					trap - EXIT
 				else
-					acquire_lock
-					trap release_lock EXIT
 					[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
 					if [[ -z "$region" ]]; then
@@ -361,13 +322,9 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-					release_lock
-					trap - EXIT
 				fi
 			else
 				if [[ "$1" == "--sound" ]]; then
-					acquire_lock
-					trap release_lock EXIT
 					[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
 					if [[ -z "$region" ]]; then
@@ -376,8 +333,6 @@ else
 					fi
 					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" --audio="$(getaudiooutput)" -r $fps &
 					disown
-					release_lock
-					trap - EXIT
 				elif [[ "$1" == "--fullscreen-sound" ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
@@ -396,32 +351,24 @@ else
 					disown
 				elif [[ "$1" == "--gif" ]]; then
 					touch "$gif_pending_file"
-					acquire_lock
-					trap release_lock EXIT
 					[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
-					region=$(slurp)
-					if [[ -z "$region" ]]; then
-						notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
-						exit 1
-					fi
-					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
-					disown
-					release_lock
-					trap - EXIT
+						region=$(slurp)
+						if [[ -z "$region" ]]; then
+							notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
+							exit 1
+						fi
+						"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
+						disown
 				else
 					if [[ -z "$1" || "$1" == "--no-sound" ]]; then
-						acquire_lock
-						trap release_lock EXIT
-					[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
-					region=$(slurp)
-					if [[ -z "$region" ]]; then
-						notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
-						exit 1
-					fi
-					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
-					disown
-						release_lock
-						trap - EXIT
+						[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
+						region=$(slurp)
+						if [[ -z "$region" ]]; then
+							notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
+							exit 1
+						fi
+						"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
+						disown
 					fi
 				fi
 			fi
