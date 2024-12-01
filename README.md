@@ -1,4 +1,4 @@
-# VNREZ Tool [<img src="./assets/icon.png" width="225" align="left" alt="VNREZ Logo">](https://github.com/verysillycat/vnrez)
+# VNREZ Tool [<img src="./assets/logo.png" width="225" align="left" alt="VNREZ Logo">](https://github.com/verysillycat/vnrez)
 
 #### Make Recordings & Screenshots and upload them to your favorite file hosts on Linux, with support for region, GIF, and audio at ease.
 
