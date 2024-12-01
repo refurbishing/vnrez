@@ -5,7 +5,7 @@ source "$SCRIPT_DIR/components/functions/variables.sh"
 source "$SCRIPT_DIR/components/functions/config.sh"
 source "$SCRIPT_DIR/components/functions/checks.sh"
 source "$SCRIPT_DIR/components/functions/misc.sh"
-
+source "$SCRIPT_DIR/components/functions/locks.sh"
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
 fi
@@ -647,6 +647,15 @@ if [[ "$1" == "shot" ]]; then
 fi
 
 if [[ "$1" == "record" ]]; then
-    "$SCRIPT_DIR/components/record.sh" "${@:2}"
+    if [[ "$2" == "--abort" ]]; then
+        "$SCRIPT_DIR/components/record.sh" "${@:2}"
+    elif pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
+        "$SCRIPT_DIR/components/record.sh"
+    else
+        acquire_lock
+        trap release_lock EXIT
+        "$SCRIPT_DIR/components/record.sh" "${@:2}"
+    fi
+    release_lock
     exit 0
 fi
