@@ -658,9 +658,9 @@ fi
 if [[ "$1" == "record" || "$2" == "record" ]]; then
 	if [[ "$2" == "--abort" ]]; then
 		"$SCRIPT_DIR/components/record.sh" "${@:2}"
-	elif [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+	elif [[ "$1" == "auto" || "$2" == "record" && ! -f "$CONFIG_FILE" ]]; then
 		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
-			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
+			"$SCRIPT_DIR/components/record.sh" auto
 			exit 0
 		else
 			if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
