@@ -6,18 +6,19 @@ source "$SCRIPT_DIR/components/functions/config.sh"
 source "$SCRIPT_DIR/components/functions/checks.sh"
 source "$SCRIPT_DIR/components/functions/misc.sh"
 source "$SCRIPT_DIR/components/functions/locks.sh"
+
 if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; then
 	help
 fi
 
 check_root
 check_dependencies
 
-if [[ "$1" != "upload" && "$1" != "-u" && "$1" != "shot" && "$1" != "record" && "$1" != "config" && "$1" != "reinstall" ]]; then
+if [[ "$1" != "upload" && "$1" != "-u" && "$1" != "auto" && "$1" != "shot" && "$1" != "record" && "$1" != "config" && "$1" != "reinstall" ]] || [[ "$1" == "auto" && -z "$2" ]]; then
 	handle_resize
 	trap handle_resize SIGWINCH
 fi
@@ -377,7 +378,7 @@ if [[ "$1" == "reinstall" ]]; then
 	exit 0
 fi
 
-if [[ ! -f "$CONFIG_FILE" ]]; then
+if [[ ! -f "$CONFIG_FILE" && ! ("$1" == "auto" && ("$2" == "record" || "$2" == "shot")) ]]; then
 	initial_setup
 fi
 
@@ -645,21 +646,37 @@ if [[ "$1" == "upload" || "$1" == "-u" ]]; then
 	exit 0
 fi
 
-if [[ "$1" == "shot" ]]; then
-	"$SCRIPT_DIR/components/shot.sh" "${@:2}"
+if [[ "$1" == "shot" || "$2" == "shot" ]]; then
+	if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+		"$SCRIPT_DIR/components/shot.sh" auto "${@:2}"
+	else
+		"$SCRIPT_DIR/components/shot.sh" "${@:2}"
+	fi
 	exit 0
 fi
 
-if [[ "$1" == "record" ]]; then
+if [[ "$1" == "record" || "$2" == "record" ]]; then
 	if [[ "$2" == "--abort" ]]; then
 		"$SCRIPT_DIR/components/record.sh" "${@:2}"
-	elif pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
-		"$SCRIPT_DIR/components/record.sh"
-	else
+	elif [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
+			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
+			exit 0
+		else
+			if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
+				"$SCRIPT_DIR/components/record.sh"
+				exit 0
+			fi
+		fi
 		acquire_lock
-		trap release_lock EXIT
+		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+			trap release_lock EXIT
+			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
+		fi
+	else
 		"$SCRIPT_DIR/components/record.sh" "${@:2}"
 	fi
 	release_lock
-	exit 0
 fi
+
+exit 0

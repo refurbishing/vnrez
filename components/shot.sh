@@ -7,9 +7,17 @@ source "$SCRIPT_DIR/functions/core.sh"
 
 check_dependencies
 check_root
-check_variables
 
-if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+if [[ "$1" != "auto" && ! -f "$CONFIG_FILE" ]]; then
+	check_variables
+fi
+
+if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+	service="none"
+	shift
+fi
+
+if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; then
 	help
 fi
 
@@ -19,7 +27,7 @@ else
 	clipboard_tool="xclip"
 fi
 
-if [[ -z "$1" || "$1" == "--gui" ]]; then
+if [[ -z "$1" || "$1" == "--gui" || "$2" == "--gui" || -z "$2" ]]; then
 	flameshot gui -r >$temp_file &
 	# end-4's hyprland dotfiles detection
 	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && -n "$(command -v pacman)" ]]; then
@@ -27,9 +35,9 @@ if [[ -z "$1" || "$1" == "--gui" ]]; then
 			ags run-js "closeEverything();" >/dev/null 2>&1
 		fi
 	fi
-elif [[ "$1" == "--full" ]]; then
+elif [[ "$1" == "--full" || "$2" == "--full" ]]; then
 	flameshot full -r >$temp_file &
-elif [[ "$1" == "--screen" ]]; then
+elif [[ "$1" == "--screen" || "$2" == "--screen" ]]; then
 	flameshot screen -r >$temp_file &
 fi
 wait

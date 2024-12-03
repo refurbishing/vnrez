@@ -16,7 +16,12 @@ kooha_last_time="$CONFIG_DIR/last_time"
 
 valid_extensions=("mp4" "mkv" "webm" "gif")
 
-lockfile="$CONFIG_DIR/.script.lck"
+if [ "$1" = "auto" ]; then
+	lockfile="/tmp/.vnrez.lck"
+else
+	lockfile="$CONFIG_DIR/.script.lck"
+fi
+
 upload_lockfile="$CONFIG_DIR/.upload.lck"
 
 if [ "$service" = "e-z" ]; then

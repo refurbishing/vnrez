@@ -64,6 +64,7 @@ Now paste that API KEY when doing the initial setup.
 - `upload (-u)` upload specified video files (mp4, mkv, webm, gif)
 - `config` open the configuration file in the default text editor
 - `reinstall` reinstall the configuration file with default settings
+- `auto` run with default settings without using a config file
 
 ### Screenshot
  <small><strong>case: shot</strong></small>
