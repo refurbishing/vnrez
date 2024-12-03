@@ -132,6 +132,21 @@ upload_kooha() {
 		for file_path in $new_files; do
 			let file_count=file_count+1
 			if [[ -f "$file_path" && -s "$file_path" ]]; then
+				if [[ "$service" == "none" ]]; then
+					file_count=0
+					for file_path in $new_files; do
+						let file_count=file_count+1
+						echo -n "file://$(realpath "$file_path")" | wl-copy -t text/uri-list
+						if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
+							notify-send "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
+						else
+							notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+						fi
+					done
+					exit 0
+			fi
+		fi
+			if [[ -f "$file_path" && -s "$file_path" ]]; then
 				if [[ "$colorworkaround" == true && "${file_path##*.}" != "gif" ]]; then
 					post_process_video "$file_path"
 				fi
@@ -146,6 +161,8 @@ upload_kooha() {
 
 					if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
 						notify-send -i link "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
+					else
+						notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
 					fi
 				else
 					echo "Error: Encoded file not found: $file_path"
@@ -206,7 +223,7 @@ abort_upload() {
 			if [[ "$service" == "none" ]]; then
 				[[ "$endnotif" == true ]] && notify-send "Recording Aborted" "The Recording has been aborted." -a "VNREZ Recorder"
 			else
-				[[ "$endnotif" == true ]] && notify-send "Recording Aborted" "The upload has been aborted." -a "VNREZ Recorder"
+				[[ "$endnotif" == true ]] && notify-send "Recording(s) Aborted" "The upload has been aborted." -a "VNREZ Recorder"
 			fi
 			check=true
 		fi
@@ -304,3 +321,4 @@ post_process_video() {
 	ffmpeg -i "$input_file" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,format=$pixelformat" -colorspace bt709 -color_primaries bt709 -color_trc bt709 -c:v $encoder -preset $preset -crf $crf -movflags +faststart -c:a copy "$output_file"
 	mv "$output_file" "$input_file"
 }
+
