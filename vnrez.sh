@@ -668,12 +668,14 @@ if [[ "$1" == "record" || "$2" == "record" ]]; then
 				exit 0
 			fi
 		fi
-		acquire_lock
-		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" || "$2" == "record" ]]; then
+			acquire_lock
 			trap release_lock EXIT
 			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
 		fi
 	else
+		acquire_lock
+		trap release_lock EXIT
 		"$SCRIPT_DIR/components/record.sh" "${@:2}"
 	fi
 	release_lock
