@@ -52,16 +52,19 @@ gif() {
 	echo "$gif_file"
 }
 
-if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" &&
-	("$XDG_CURRENT_DESKTOP" == "GNOME" ||
-	"$XDG_CURRENT_DESKTOP" == "KDE" ||
-	"$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
 	mkdir -p "$(eval echo $directory)"
 	cd "$(eval echo $directory)" || exit
 else
 	if [[ "$service" == none ]]; then
-		mkdir -p /tmp/temp
-		find /tmp/temp -maxdepth 0 -type d -ctime +1 -exec rm -rf {} \; >/dev/null 2>&1
+		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+			if [[ "$1" == "auto" ]]; then
+				find "$(eval echo $kooha_dir)" -maxdepth 0 -type d -ctime +1 -exec rm -rf {} \; >/dev/null 2>&1
+			fi
+		else
+			mkdir -p /tmp/temp
+			find /tmp/temp -maxdepth 0 -type d -ctime +1 -exec rm -rf {} \; >/dev/null 2>&1
+		fi
 		cd /tmp/temp || exit
 	else
 		cd /tmp || exit
