@@ -35,7 +35,7 @@ upload_video() {
 			file_path=$(realpath "$file")
 			echo -n "file://$file_path" | xclip -selection clipboard -t text/uri-list
 		fi
-		notify-send "Video copied to clipboard" -a "VNREZ Recorder"
+		[[ "$endnotif" == true ]] && notify-send "Video copied to clipboard" -a "VNREZ Recorder"
 		exit 0
 	fi
 
@@ -58,7 +58,15 @@ upload_video() {
 		exit 1
 	fi
 
-	success=$(jq -r ".success" <$response_video)
+	if [[ "$service" == "e-z" ]]; then
+		success=$(jq -r ".success" <$response_video)
+	elif [[ "$service" == "nest" ]]; then
+		success=$(jq -r ".success" <$response_video)
+		if [[ "$http_code" -eq 200 && "$success" == "null" ]]; then
+			success="true"
+		fi
+	fi
+
 	if [[ "$success" != "true" ]] || [[ "$success" == "null" ]]; then
 		error=$(jq -r ".error" <$response_video)
 		if [[ "$error" == "null" ]]; then
@@ -95,12 +103,12 @@ upload_video() {
 		fi
 		if [[ "$is_gif" == "--gif" || "$file" == *.gif ]]; then
 			if [[ "$XDG_SESSION_TYPE" != "wayland" || ("$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE") ]]; then
-				notify-send "GIF URL copied to clipboard" -a "VNREZ Recorder" -i link
+				[[ "$endnotif" == true ]] && notify-send "GIF URL copied to clipboard" -a "VNREZ Recorder" -i link
 			fi
 			[[ "$is_gif" == "--gif" && "$upload_mode" != true ]] && rm "$gif_pending_file"
 		else
 			if [[ "$XDG_SESSION_TYPE" != "wayland" || ("$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE") ]]; then
-				notify-send "Video URL copied to clipboard" -a "VNREZ Recorder" -i link
+				[[ "$endnotif" == true ]] && notify-send "Video URL copied to clipboard" -a "VNREZ Recorder" -i link
 			fi
 		fi
 		if [[ "$save" == false && "$upload_mode" != true ]]; then
@@ -138,9 +146,9 @@ upload_kooha() {
 						let file_count=file_count+1
 						echo -n "file://$(realpath "$file_path")" | wl-copy -t text/uri-list
 						if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
-							notify-send "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
+							[[ "$endnotif" == true ]] && notify-send "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
 						else
-							notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+							[[ "$endnotif" == true ]] && notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
 						fi
 					done
 					exit 0
@@ -160,9 +168,9 @@ upload_kooha() {
 					fi
 
 					if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
-						notify-send -i link "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
+						[[ "$endnotif" == true ]] && notify-send -i link "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
 					else
-						notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+						[[ "$endnotif" == true ]] && notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
 					fi
 				else
 					echo "Error: Encoded file not found: $file_path"

@@ -43,3 +43,24 @@ if [ "$service" = "e-z" ]; then
 elif [ "$service" = "nest" ]; then
 	url=$nest
 fi
+
+valid_args=(
+    "--help"
+    "-h"
+    "config"
+    "reinstall"
+    "upload"
+    "-u"
+    "auto"
+    "shot"
+    "record"
+    "--gui"
+    "--full"
+    "--screen"
+    "--sound"
+    "--fullscreen-sound"
+    "--fullscreen"
+    "--no-sound"
+    "--gif"
+	"--abort"
+)

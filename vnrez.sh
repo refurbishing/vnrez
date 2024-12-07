@@ -11,17 +11,20 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
+
+if [[ -n "$1" && ! " ${valid_args[@]} " =~ " $1 " ]]; then
+	notify-send "Invalid argument: $1" -a "VNREZ Recorder"
+	echo "Argument: \"$1\" is not valid."
+	echo "Use '--help' or '-h' to see the list of valid arguments."
+	exit 1
+fi
+
 if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; then
 	help
 fi
 
 check_root
 check_dependencies
-
-if [[ "$1" != "upload" && "$1" != "-u" && "$1" != "auto" && "$1" != "shot" && "$1" != "record" && "$1" != "config" && "$1" != "reinstall" ]] || [[ "$1" == "auto" && -z "$2" ]]; then
-	handle_resize
-	trap handle_resize SIGWINCH
-fi
 
 initial_setup() {
 	echo -e "Initializing.."
@@ -170,6 +173,7 @@ initial_setup() {
 		tput sc
 
 		while true; do
+		trap handle_resize SIGWINCH
 			tput rc
 			tput civis
 			tput el
@@ -231,10 +235,10 @@ initial_setup() {
 		read -r save_recordings
 		if [[ "$save_recordings" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 			save=true
-			echo -e "\e[33mEnter the directory to save files (default is ~/Videos):\e[0m"
+			echo -e "\e[33mEnter the directory to save files (You need to set it on Kooha too) (default is ~/Videos/Kooha) :\e[0m"
 			echo -n "✦ ) "
 			read -r kooha_dir
-			kooha_dir=${kooha_dir:-"$HOME/Videos"}
+			kooha_dir=${kooha_dir:-"$HOME/Videos/Kooha"}
 			while [[ ! -d "$kooha_dir" || "$kooha_dir" == "/" || "$kooha_dir" != "$HOME"* ]]; do
 				echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
 				echo -n "✦ ) "
@@ -344,7 +348,30 @@ initial_setup() {
 			fi
 		fi
 	fi
-	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save"
+
+	if [[ "$XDG_SESSION_TYPE" == "wayland" || "$XDG_SESSION_TYPE" == "x11" ]]; then
+		echo -e "\e[33mDo you want to start notifications? (Y/N):\e[0m"
+		echo -n "✦ ) "
+		read -r startnotif
+		if [[ -z "$startnotif" || "$startnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+			startnotif=true
+		else
+			startnotif=false
+		fi
+	fi
+
+	if [[ "$XDG_SESSION_TYPE" == "wayland" || "$XDG_SESSION_TYPE" == "x11" ]]; then
+		echo -e "\e[33mDo you want to end notifications? (Y/N):\e[0m"
+		echo -n "✦ ) "
+		read -r endnotif
+		if [[ -z "$endnotif" || "$endnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+			endnotif=true
+		else
+			endnotif=false
+		fi
+	fi
+
+	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif"
 }
 
 check_dependencies
@@ -387,7 +414,7 @@ if [[ -f "$CONFIG_FILE" ]]; then
 	update_config
 fi
 
-if [[ -z "$1" ]]; then
+if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 	options=("record" "shot" "upload" "ǀ" "⨯")
 	selected=0
 	tput clear
@@ -464,17 +491,16 @@ if [[ -z "$1" ]]; then
 					error_message="ERROR: Service is none."
 					hpad=$(((cols - ${#error_message}) / 2))
 					printf "%${hpad}s\033[1;5;31mERROR:\033[0m Service is none.\n"
-					text="Would you like to add a service? (Y/N): "
 					hpad=$(((cols - ${#text}) / 2))
-					printf "%${hpad}s%s" "" "$text"
+					printf "%${hpad}s%s" "" "Would you like to add a service? (Y/N): "
 					read -r add_service
 					if [[ "$add_service" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 						prompt_service=true
 						initial_setup
 						exec "$0" "$@"
 					fi
-				else
-					tput cnorm
+			else
+				tput cnorm
 					if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
 						default_save_dir="$(eval echo $kooha_dir)"
 					else

@@ -16,7 +16,9 @@ create_default_config() {
 	local failsave=${11}
 	local save=${12}
 	local encoder=${13}
-
+	local startnotif=${14}
+	local endnotif=${15}
+	
 	mkdir -p "$CONFIG_DIR"
 
 	local auth_variable=""
@@ -37,8 +39,8 @@ encoder=$encoder
 save=$save
 failsave=$failsave
 colorworkaround=false
-startnotif=true
-endnotif=true
+startnotif=$startnotif
+endnotif=$endnotif
 
 wlscreenrec=$wlscreenrec
 codec=$codec
