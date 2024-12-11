@@ -14,6 +14,12 @@ response_video="/tmp/upload_video.json"
 gif_pending_file="/tmp/gif_pending"
 valid_extensions=("mp4" "mkv" "webm" "gif")
 
+if [[ "$1" == "auto" ]]; then
+	arg="$2"
+else
+	arg="$1"
+fi
+
 if [ "$1" = "auto" ]; then
 	kooha_last_time="/tmp/.vnrez_kooha_last-time"
 else
@@ -45,7 +51,6 @@ elif [ "$service" = "nest" ]; then
 fi
 
 valid_cases=(
-    "auto"
     "--help"
     "-h"
     "config"

@@ -12,12 +12,6 @@ if [[ "$1" != "auto" && ! -f "$CONFIG_FILE" ]]; then
 	check_variables
 fi
 
-if [[ "$1" == "auto" ]]; then
-	arg="$2"
-else
-	arg="$1"
-fi
-
 if [[ "$arg" != "--screen" && "$arg" != "shot" && "$arg" != "--full" && "$arg" != "--gui" ]]; then
 	notify-send "Invalid argument: $arg" -a "VNREZ Recorder"
 	echo "Argument: \"$arg\" is not valid."

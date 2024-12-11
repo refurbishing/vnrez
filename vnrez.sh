@@ -11,16 +11,9 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-
-if [[ "$1" == "auto" ]]; then
-	case_arg="$2"
-else
-	case_arg="$1"
-fi
-
-if [[ -n "$case_arg" && ! " ${valid_cases[@]} " =~ " $case_arg " ]]; then
-	notify-send "Invalid Case: $case_arg" -a "VNREZ Recorder"
-	echo "Case: \"$case_arg\" is not valid or recognized."
+if [[ -n "$arg" && ! " ${valid_cases[@]} " =~ " $arg " ]]; then
+	notify-send "Invalid Case: $arg" -a "VNREZ Recorder"
+	echo "Case: \"$arg\" is not valid or recognized."
 	echo "Use --help or -h to see the list of valid cases."
 	exit 1
 fi
