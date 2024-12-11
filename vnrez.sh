@@ -12,10 +12,23 @@ if [ -f "$CONFIG_FILE" ]; then
 fi
 
 
-if [[ -n "$1" && ! " ${valid_args[@]} " =~ " $1 " ]]; then
-	notify-send "Invalid argument: $1" -a "VNREZ Recorder"
-	echo "Argument: \"$1\" is not valid."
-	echo "Use '--help' or '-h' to see the list of valid arguments."
+if [[ "$1" == "auto" ]]; then
+	case_arg="$2"
+else
+	case_arg="$1"
+fi
+
+if [[ -n "$case_arg" && ! " ${valid_cases[@]} " =~ " $case_arg " ]]; then
+	notify-send "Invalid Case: $case_arg" -a "VNREZ Recorder"
+	echo "Case: \"$case_arg\" is not valid or recognized."
+	echo "Use --help or -h to see the list of valid cases."
+	exit 1
+fi
+
+if [[ -n "$2" && "$1" != "auto" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
+	notify-send "Invalid argument: $2" -a "VNREZ Recorder"
+	echo "Argument: \"$2\" is not valid or recognized."
+	echo "Use --help or -h to see the list of valid arguments."
 	exit 1
 fi
 
@@ -508,7 +521,8 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 					fi
 
 					printf "\nEnter the file paths to upload, separated by spaces (limit is 6):\n"
-					echo -n "✦ ) "
+					echo -n "✦"
+					echo -n " ) " 
 					file_paths=""
 					while IFS= read -r -s -n1 char; do
 						if [[ $char == "" ]]; then

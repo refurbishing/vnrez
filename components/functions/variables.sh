@@ -44,16 +44,19 @@ elif [ "$service" = "nest" ]; then
 	url=$nest
 fi
 
-valid_args=(
+valid_cases=(
+    "auto"
     "--help"
     "-h"
     "config"
     "reinstall"
     "upload"
     "-u"
-    "auto"
     "shot"
     "record"
+)
+
+valid_args=(
     "--gui"
     "--full"
     "--screen"
