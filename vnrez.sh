@@ -18,7 +18,7 @@ if [[ -n "$arg" && ! " ${valid_cases[@]} " =~ " $arg " ]]; then
 	exit 1
 fi
 
-if [[ -n "$2" && "$1" != "auto" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
+if [[ -n "$2" && "$1" != "auto" && "$1" != "-u" && "$1" != "upload" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
 	notify-send "Invalid argument: $2" -a "VNREZ Recorder"
 	echo "Argument: \"$2\" is not valid or recognized."
 	echo "Use --help or -h to see the list of valid arguments."
