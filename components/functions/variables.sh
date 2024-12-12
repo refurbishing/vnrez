@@ -15,9 +15,9 @@ gif_pending_file="/tmp/gif_pending"
 valid_extensions=("mp4" "mkv" "webm" "gif")
 
 if [[ "$1" == "auto" ]]; then
-	arg="$2"
+	case="$2"
 else
-	arg="$1"
+	case="$1"
 fi
 
 if [ "$1" = "auto" ]; then

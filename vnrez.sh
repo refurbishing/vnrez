@@ -11,16 +11,18 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-if [[ -n "$arg" && ! " ${valid_cases[@]} " =~ " $arg " ]]; then
-	notify-send "Invalid Case: $arg" -a "VNREZ Recorder"
-	echo "Case: \"$arg\" is not valid or recognized."
+if [[ -n "$case" && ! " ${valid_cases[@]} " =~ " $case " ]]; then
+	notify-send "Invalid Case: $case" -a "VNREZ Recorder"
+	echo "Case: \"$case\" is not valid or recognized."
 	echo "Use --help or -h to see the list of valid cases."
 	exit 1
 fi
 
-if [[ -n "$2" && "$1" != "auto" && "$1" != "-u" && "$1" != "upload" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
-	notify-send "Invalid argument: $2" -a "VNREZ Recorder"
-	echo "Argument: \"$2\" is not valid or recognized."
+if [[ "$1" == "auto" && -n "$3" && ! " ${valid_args[@]} " =~ " $3 " ]] || \
+   [[ -n "$2" && "$1" != "auto" && "$1" != "-u" && "$1" != "upload" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
+	invalid_arg="$([[ "$1" == "auto" ]] && echo "$3" || echo "$2")"
+	notify-send "Invalid argument: $invalid_arg" -a "VNREZ Recorder"
+	echo "Argument: \"$invalid_arg\" is not valid or recognized."
 	echo "Use --help or -h to see the list of valid arguments."
 	exit 1
 fi
@@ -411,7 +413,7 @@ if [[ "$1" == "reinstall" ]]; then
 	exit 0
 fi
 
-if [[ ! -f "$CONFIG_FILE" && ! ("$1" == "auto" && ("$2" == "record" || "$2" == "shot")) ]]; then
+if [[ ! -f "$CONFIG_FILE" && ! ("$1" == "auto" && ("$2" == "record" || "$2" == "shot" )) ]]; then
 	initial_setup
 fi
 
@@ -674,8 +676,12 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 	exec "$0" "$@"
 fi
 
-if [[ "$1" == "upload" || "$1" == "-u" ]]; then
-	"$SCRIPT_DIR/components/upload.sh" "${@:2}"
+if [[ "$1" == "upload" || "$1" == "-u" || ( "$1" == "auto" && "$2" == "upload" || "$2" == "-u" ) ]]; then
+	if [[ "$1" == "auto" ]]; then
+		"$SCRIPT_DIR/components/upload.sh" "${@:3}"
+	else
+		"$SCRIPT_DIR/components/upload.sh" "${@:2}"
+	fi
 	exit 0
 fi
 
