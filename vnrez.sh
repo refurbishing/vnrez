@@ -18,7 +18,7 @@ if [[ -n "$handle_auto" && ! " ${valid_cases[@]} " =~ " $handle_auto " ]]; then
 	exit 1
 fi
 
-if [[ "$1" == "auto" && -n "$3" && ! " ${valid_args[@]} " =~ " $3 " ]] || \
+if [[ "$1" == "auto" && -n "$3" && ! " ${valid_args[@]} " =~ " $3 " && "$2" != "upload" && "$2" != "-u" ]] || \
    [[ -n "$2" && "$1" != "auto" && "$1" != "-u" && "$1" != "upload" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
 	invalid_arg="$([[ "$1" == "auto" ]] && echo "$3" || echo "$2")"
 	notify-send "Invalid argument: $invalid_arg" -a "VNREZ Recorder"
