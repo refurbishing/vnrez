@@ -12,9 +12,9 @@ if [[ "$1" != "auto" && ! -f "$CONFIG_FILE" ]]; then
 	check_variables
 fi
 
-if [[ "$arg" != "--screen" && "$arg" != "shot" && "$arg" != "--full" && "$arg" != "--gui" ]]; then
-	notify-send "Invalid argument: $arg" -a "VNREZ Recorder"
-	echo "Argument: \"$arg\" is not valid."
+if [[ "$handle_auto" != "--screen" && "$handle_auto" != "shot" && "$handle_auto" != "--full" && "$handle_auto" != "--gui" ]]; then
+	notify-send "Invalid handle_autoument: $handle_auto" -a "VNREZ Recorder"
+	echo "handle_autoument: \"$handle_auto\" is not valid."
 	exit 1
 fi
 
