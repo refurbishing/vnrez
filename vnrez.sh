@@ -647,7 +647,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			;;
 		"")
 			sub_choice=${sub_options[$selected]}
-			if [[ "$sub_choice" == "" ]]; then
+			if [[ "$sub_choice" == "⨯" ]]; then
 				tput cnorm
 				exit 0
 			fi
