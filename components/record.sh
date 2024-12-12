@@ -278,14 +278,13 @@ else
 						notify-send "Recording Canceling" 'Canceled' -a "VNREZ Recorder"
 						exit 1
 					fi
-					command="$recorder_command --geometry \"$region\" --audio --audio-device \"$(getaudiooutput)\""
 					if [[ "$extpixelformat" != "auto" ]]; then
-						command+=" --encode-pixfmt \"$extpixelformat\""
+						wl-screenrec --geometry "$region" --audio --audio-device "$(getaudiooutput)" --encode-pixfmt "$extpixelformat" -f "./recording_$(getdate).mp4" &
+					else
+						wl-screenrec --geometry "$region" --audio --audio-device "$(getaudiooutput)" -f "./recording_$(getdate).mp4" &
 					fi
-					command+=" -f './recording_'"$(getdate)"'.mp4'"
-					eval "$command" &
 					disown
-				elif [[ "$1" || "$2" == "--fullscreen-sound" ]]; then
+				elif [[ "$1" == "--fullscreen-sound" || "$2" == "--fullscreen-sound" ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
@@ -298,7 +297,7 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-				elif [[ "$1" || "$2" == "--fullscreen" ]]; then
+				elif [[ "$1" == "--fullscreen" || "$2" == "--fullscreen" ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
@@ -311,7 +310,7 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-				elif [[ "$1" || "$2" == "--gif" ]]; then
+				elif [[ "$1" == "--gif" || "$2" == "--gif" ]]; then
 					touch "$gif_pending_file"
 					[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
