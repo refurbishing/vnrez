@@ -50,9 +50,6 @@ for file in "${files[@]}"; do
 	if [[ -d "$file" || "$filename" == "$extension" ]]; then
 		printf "\033[1;5;31mERROR:\033[0m \033[1;34m\033[7m$file\033[0m is a Directory or file that doesn't have a extension.\n"
 		continue
-	elif [[ ! " ${valid_extensions[@]} " =~ " ${extension} " ]]; then
-		printf "\033[1;5;31mERROR:\033[0m Unsupported file type: \033[1;34m${filename%.*}\033[4m.${extension}\033[0m\n"
-		continue
 	fi
 
 	if [[ -n "${processed_files[$file_key]}" ]]; then

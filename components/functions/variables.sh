@@ -12,7 +12,6 @@ temp_file="/tmp/screenshot.png"
 response="/tmp/upload.json"
 response_video="/tmp/upload_video.json"
 gif_pending_file="/tmp/gif_pending"
-valid_extensions=("mp4" "mkv" "webm" "gif")
 
 if [[ "$1" == "auto" ]]; then
 	handle_auto="$2"
