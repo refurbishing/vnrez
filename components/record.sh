@@ -52,12 +52,12 @@ gif() {
 	echo "$gif_file"
 }
 
-if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 	mkdir -p "$(eval echo $directory)"
 	cd "$(eval echo $directory)" || exit
 else
 	if [[ "$service" == none ]]; then
-		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 			if [[ "$1" == "auto" ]]; then
 				find "$(eval echo $kooha_dir)" -maxdepth 0 -type d -ctime +1 -exec rm -rf {} \; >/dev/null 2>&1
 			fi
@@ -135,7 +135,7 @@ fi
 
 if [[ -z "$1" || "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "--fullscreen" || "$1" == "--gif" || "$1" == "--no-sound" || -z "$2" || "$2" == "--sound" || "$2" == "--fullscreen-sound" || "$2" == "--fullscreen" || "$2" == "--gif" || "$2" == "--no-sound" ]]; then
 	if [[ "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "--fullscreen" || "$1" == "--no-sound" || "$2" == "--sound" || "$2" == "--fullscreen-sound" || "$2" == "--fullscreen" || "$2" == "--no-sound" ]]; then
-		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 			printf "\e[30m\e[46m$1\e[0m"
 			printf "\e[1;32m is only for X11 or wlroots Compositors as its not needed. \e[0m\n"
 			notify-send "This Argument is only for X11 or wlroots Compositors" "As its not needed." -a "VNREZ Recorder"
@@ -144,7 +144,7 @@ if [[ -z "$1" || "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "-
 		fi
 	fi
 else
-	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 		echo "Invalid argument: $1"
 		notify-send "Invalid argument: $1" -a "VNREZ Recorder"
 		exit 1
@@ -165,7 +165,7 @@ get_recorder_command() {
 	fi
 }
 
-if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 	if pgrep -x "kooha" >/dev/null; then
 		echo "Kooha is already running."
 		echo "For the Videos to Upload, Simply just Close the Window."

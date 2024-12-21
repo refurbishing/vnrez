@@ -191,7 +191,7 @@ initial_setup() {
 		return
 	fi
 
-	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" )) && "$XDG_SESSION_TYPE" != "x11" ]]; then
+	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) && "$XDG_SESSION_TYPE" != "x11" ]]; then
 		screen_recorders=("wf-recorder" "wl-screenrec")
 		selected=0
 
@@ -241,7 +241,7 @@ initial_setup() {
 		fi
 	fi
 	tput cnorm
-	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 		echo -e "\e[33mEnter the desired FPS (default is 60):\e[0m"
 		echo -n "✦ ) "
 		read -r fps
@@ -254,7 +254,7 @@ initial_setup() {
 		done
 	fi
 
-	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 		echo -e "\e[33mDo you want to save recordings? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r save_recordings
@@ -276,7 +276,7 @@ initial_setup() {
 		fi
 	fi
 
-	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 		if [[ "$service" != "none" ]]; then
 			echo -e "\e[33mDo you want to enable failsave? (Y/N):\e[0m"
 			echo -n "✦ ) "
@@ -341,7 +341,7 @@ initial_setup() {
 		codec=${codec:-auto}
 	fi
 
-	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 		echo -e "\e[33mDo you want to save recordings? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r save_recordings
@@ -526,7 +526,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 					fi
 			else
 				tput cnorm
-					if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+					if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 						default_save_dir="$(eval echo $kooha_dir)"
 					else
 						default_save_dir="$(eval echo $directory)"
@@ -579,7 +579,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 
 	tput cnorm
 	if [[ "$choice" == "record" ]]; then
-		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 			sub_options=("none" "gif" "abort" "ǀ" "↩" "⨯")
 		else
 			sub_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort" "ǀ" "↩" "⨯")
@@ -611,7 +611,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 		hpad_small=$(((cols - ${#text}) / 3 + 5))
 		printf "%${hpad}s" ""
 		echo -e "\e[36m$text\e[0m"
-		if [[ "$choice" == "record" && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+		if [[ "$choice" == "record" && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 			printf "%${hpad_small}s" ""
 		else
 			printf "%${hpad}s"""
@@ -678,7 +678,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 
 	tput cnorm
 	if [[ "$choice" == "record" ]]; then
-		if [[ "$sub_choice" == "none" && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC") ]]; then
+		if [[ "$sub_choice" == "none" && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 			sleep 0.5
 			"$SCRIPT_DIR/components/record.sh" &>/dev/null
 		else

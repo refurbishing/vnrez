@@ -27,14 +27,14 @@ check_variables() {
 		fi
 	fi
 
-	if [[ -z "$encoder" && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+	if [[ -z "$encoder" && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 		echo "Encoder is not set."
 		echo "Edit the configuration file with config argument to add the encoder."
 		notify-send "Encoder is not set." 'Edit the config file to add the encoder.' -a "VENZ Recorder"
 		exit 1
 	fi
 
-	if [[ -z "$pixelformat" && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) ]]; then
+	if [[ -z "$pixelformat" && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 		echo "Pixelformat is not set."
 		echo "Edit the configuration file with config argument to add the pixelformat."
 		notify-send "Pixelformat is not set." 'Edit the config file to add the pixelformat.' -a "VENZ Recorder"
@@ -47,7 +47,7 @@ check_dependencies() {
 	local dependencies=("jq" "curl" "flameshot")
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-		if [[ "$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" ]]; then
+		if [[ "$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon" ]]; then
 			dependencies+=("wl-copy" "kooha")
 		else
 			dependencies+=("wl-copy" "slurp" "wlr-randr")
