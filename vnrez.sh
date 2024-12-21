@@ -7,6 +7,7 @@ source "$SCRIPT_DIR/components/functions/checks.sh"
 source "$SCRIPT_DIR/components/functions/misc.sh"
 source "$SCRIPT_DIR/components/functions/locks.sh"
 
+trap 'tput cnorm' EXIT
 if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
