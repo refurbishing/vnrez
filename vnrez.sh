@@ -191,7 +191,7 @@ initial_setup() {
 		return
 	fi
 
-	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC")) && "$XDG_SESSION_TYPE" != "x11" ]]; then
+	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" )) && "$XDG_SESSION_TYPE" != "x11" ]]; then
 		screen_recorders=("wf-recorder" "wl-screenrec")
 		selected=0
 
@@ -585,7 +585,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			sub_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort" "ǀ" "↩" "⨯")
 		fi
 	elif [[ "$choice" == "shot" ]]; then
-		sub_options=("gui" "full" "ǀ" "↩" "⨯")
+		sub_options=("gui" "screen" "full" "ǀ" "↩" "⨯")
 	fi
 
 	selected=0
