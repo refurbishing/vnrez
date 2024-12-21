@@ -60,10 +60,13 @@ valid_cases=(
     "record"
 )
 
-valid_args=(
+shot_args=(
     "--gui"
     "--full"
     "--screen"
+)
+
+record_args=(
     "--sound"
     "--fullscreen-sound"
     "--fullscreen"

@@ -18,13 +18,30 @@ if [[ -n "$handle_auto" && ! " ${valid_cases[@]} " =~ " $handle_auto " ]]; then
 	exit 1
 fi
 
-if [[ "$1" == "auto" && -n "$3" && ! " ${valid_args[@]} " =~ " $3 " && "$2" != "upload" && "$2" != "-u" ]] || \
-   [[ -n "$2" && "$1" != "auto" && "$1" != "-u" && "$1" != "upload" && ! " ${valid_args[@]} " =~ " $2 " ]]; then
-	invalid_arg="$([[ "$1" == "auto" ]] && echo "$3" || echo "$2")"
-	notify-send "Invalid argument: $invalid_arg" -a "VNREZ Recorder"
-	echo "Argument: \"$invalid_arg\" is not valid or recognized."
-	echo "Use --help or -h to see the list of valid arguments."
-	exit 1
+if [[ "$1" == "auto" && -n "$3" && "$2" != "upload" && "$2" != "-u" ]]; then
+    if [[ "$2" == "shot" && ! " ${shot_args[@]} " =~ " $3 " ]]; then
+        notify-send "Invalid argument: $3" -a "VNREZ Recorder"
+        echo "Argument: \"$3\" is not a valid shot argument."
+        echo "Use --help or -h to see the list of valid arguments."
+        exit 1
+    elif [[ "$2" == "record" && ! " ${record_args[@]} " =~ " $3 " ]]; then
+        notify-send "Invalid argument: $3" -a "VNREZ Recorder"
+        echo "Argument: \"$3\" is not a valid record argument."
+        echo "Use --help or -h to see the list of valid arguments."
+        exit 1
+    fi
+elif [[ -n "$2" && "$1" != "auto" && "$1" != "-u" && "$1" != "upload" ]]; then
+    if [[ "$1" == "shot" && ! " ${shot_args[@]} " =~ " $2 " ]]; then
+        notify-send "Invalid argument: $2" -a "VNREZ Recorder"
+        echo "Argument: \"$2\" is not a valid shot argument."
+        echo "Use --help or -h to see the list of valid arguments."
+        exit 1
+    elif [[ "$1" == "record" && ! " ${record_args[@]} " =~ " $2 " ]]; then
+        notify-send "Invalid argument: $2" -a "VNREZ Recorder"
+        echo "Argument: \"$2\" is not a valid record argument."
+        echo "Use --help or -h to see the list of valid arguments."
+        exit 1
+    fi
 fi
 
 if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; then
@@ -384,7 +401,7 @@ initial_setup() {
 
 check_dependencies
 
-if [[ "$1" == "config" ]]; then
+if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
 	if [[ ! -f "$CONFIG_FILE" ]]; then
 		initial_setup
 	fi
@@ -403,7 +420,7 @@ if [[ "$1" == "config" ]]; then
 	exit 0
 fi
 
-if [[ "$1" == "reinstall" ]]; then
+if [[ "$1" == "reinstall" || ( "$1" == "auto" && "$2" == "reinstall" ) ]]; then
 	read -p "Do you want to reinstall the config file with default settings? (Y/N): " confirm
 	if [[ "$confirm" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 		initial_setup
