@@ -377,7 +377,7 @@ initial_setup() {
 	fi
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" || "$XDG_SESSION_TYPE" == "x11" ]]; then
-		echo -e "\e[33mDo you want to start notifications? (Y/N):\e[0m"
+		echo -e "\e[33mDo you want to have start notifications? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r startnotif
 		if [[ -z "$startnotif" || "$startnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
@@ -388,7 +388,7 @@ initial_setup() {
 	fi
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" || "$XDG_SESSION_TYPE" == "x11" ]]; then
-		echo -e "\e[33mDo you want to end notifications? (Y/N):\e[0m"
+		echo -e "\e[33mDo you want to have end notifications? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r endnotif
 		if [[ -z "$endnotif" || "$endnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
