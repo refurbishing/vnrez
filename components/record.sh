@@ -65,6 +65,7 @@ else
 			mkdir -p /tmp/temp
 			find /tmp/temp -maxdepth 0 -type d -ctime +1 -exec rm -rf {} \; >/dev/null 2>&1
 		fi
+		mkdir -p /tmp/temp
 		cd /tmp/temp || exit
 	else
 		cd /tmp || exit
@@ -174,7 +175,11 @@ if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || 
 	fi
 	echo $(date +%s) >"$(eval echo $kooha_last_time)"
 	mkdir -p "$(eval echo $kooha_dir)"
-	kooha &
+	if command -v kooha &> /dev/null; then
+		kooha &
+	else
+		flatpak run io.github.seadve.Kooha &
+	fi
 	kooha_pid=$!
 	wait $kooha_pid
 	upload_kooha

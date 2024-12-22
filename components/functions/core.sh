@@ -136,12 +136,14 @@ upload_kooha() {
 						if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
 							[[ "$endnotif" == true ]] && notify-send "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
 						else
-							[[ "$endnotif" == true ]] && notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+							if [[ "$service" == "none" ]]; then
+								[[ "$endnotif" == true ]] && notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+							fi
 						fi
 					done
 					exit 0
+				fi
 			fi
-		fi
 			if [[ -f "$file_path" && -s "$file_path" ]]; then
 				if [[ "$colorworkaround" == true && "${file_path##*.}" != "gif" ]]; then
 					post_process_video "$file_path"
@@ -158,7 +160,9 @@ upload_kooha() {
 					if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
 						[[ "$endnotif" == true ]] && notify-send -i link "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
 					else
-						[[ "$endnotif" == true ]] && notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+						if [[ "$service" == "none" ]]; then
+							[[ "$endnotif" == true ]] && notify-send "Recording copied to clipboard" -a "VNREZ Recorder"
+						fi
 					fi
 				else
 					echo "Error: Encoded file not found: $file_path"

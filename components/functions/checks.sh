@@ -55,7 +55,10 @@ check_dependencies() {
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
 		if [[ "$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon" ]]; then
-			dependencies+=("wl-copy" "kooha")
+			dependencies+=("wl-copy")
+			if ! command -v "kooha" &>/dev/null && ! flatpak list | grep -q "io.github.seadve.Kooha"; then
+				missing_dependencies+=("kooha or io.github.seadve.Kooha (Flatpak)")
+			fi
 		else
 			dependencies+=("wl-copy" "slurp" "wlr-randr")
 			if ! command -v "wf-recorder" &>/dev/null && ! command -v "wl-screenrec" &>/dev/null; then
