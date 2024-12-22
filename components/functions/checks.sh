@@ -10,6 +10,13 @@ check_root() {
 	fi
 }
 
+check_linux() {
+	if [[ "$(uname)" != "Linux" ]]; then
+		echo "This script is intended to run on Linux systems only."
+		exit 1
+	fi
+}
+
 check_variables() {
 	if [[ -z "$service" ]]; then
 		echo "Service is not set."

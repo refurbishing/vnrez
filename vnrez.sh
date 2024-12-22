@@ -50,6 +50,7 @@ if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; t
 fi
 
 check_root
+check_linux
 check_dependencies
 
 initial_setup() {
