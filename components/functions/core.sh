@@ -11,18 +11,6 @@ upload_video() {
 		exit 1
 	fi
 
-	if [[ "$file" == *.mp4 ]]; then
-		content_type="video/mp4"
-	elif [[ "$file" == *.gif ]]; then
-		content_type="image/gif"
-	elif [[ "$file" == *.mkv ]]; then
-		content_type="video/mkv"
-	elif [[ "$file" == *.webm ]]; then
-		content_type="video/webm"
-	else
-		content_type="application/octet-stream"
-	fi
-
 	if [[ -f "$upload_pid_file" ]]; then
 		rm "$upload_pid_file"
 	fi
@@ -41,9 +29,9 @@ upload_video() {
 
 	echo $$ >"$upload_pid_file"
 	if [[ "$service" == "e-z" ]]; then
-		http_code=$(curl -X POST -F "file=@${file};type=${content_type}" -H "key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
+		http_code=$(curl -X POST -F "file=@${file}" -H "key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	elif [[ "$service" == "nest" ]]; then
-		http_code=$(curl -X POST -F "file=@${file};type=${content_type}" -H "Authorization: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
+		http_code=$(curl -X POST -F "file=@${file}" -H "Authorization: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	fi
 
 	if ! jq -e . >/dev/null 2>&1 <$response_video; then
