@@ -33,7 +33,7 @@ else
 	clipboard_tool="xclip"
 fi
 
-if [[ -z "$1" || "$1" == "--gui" || "$2" == "--gui" || (-z "$2" && "$1" == "auto") ]]; then
+if [[ -z "$1" || "$1" == "--gui" || "$2" == "--gui" || (-z "$2" || "$1" == "auto") ]]; then
 	flameshot gui -r >$temp_file &
 	# end-4's hyprland dotfiles detection
 	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && -n "$(command -v pacman)" ]]; then
