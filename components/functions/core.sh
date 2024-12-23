@@ -66,7 +66,6 @@ upload_video() {
 		fi
 		[[ "$failsave" == true && "$1" != "--abort" && "$upload_mode" != true ]] && mkdir -p ~/Videos/failed && mv "$file" ~/Videos/failed/
 		[[ "$is_gif" == "--gif" ]] && rm "$gif_pending_file"
-		[[ "$upload_mode" == true ]] && printf "\033[1;5;31mERROR:\033[0m Upload failed for file: \033[1;34m$filename\033[0m\n"
 		rm $response_video
 		if [[ -f "$upload_pid_file" ]]; then
 			rm -f "$upload_pid_file"
