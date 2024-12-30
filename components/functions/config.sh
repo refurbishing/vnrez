@@ -21,16 +21,9 @@ create_default_config() {
 	
 	mkdir -p "$CONFIG_DIR"
 
-	local auth_variable=""
-	if [[ "$service" != "none" ]]; then
-		auth_variable="${service}_auth"
-		if [[ "$service" == "e-z" ]]; then
-			auth_variable="ez_auth"
-		fi
-	fi
-
 	cat >"$CONFIG_FILE" <<EOL
-service="$service"$([[ -n "$auth_variable" ]] && echo -e "\n$auth_variable=\"$auth_token\"")
+service="$service"
+auth="$auth_token"
 fps=$fps
 crf=$crf
 preset=$preset
@@ -59,17 +52,11 @@ update_config() {
 	local config_path="$(eval echo $CONFIG_FILE)"
 	local updated=false
 	local new_config_content=""
-	local auth_variable=""
-	if [[ "$service" != "none" ]]; then
-		auth_variable="${service}_auth"
-		if [[ "$service" == "e-z" ]]; then
-			auth_variable="ez_auth"
-		fi
-	fi
 
 	local default_config_content=$(
 		cat <<EOL
-service="default_service"$([[ -n "$auth_variable" ]] && echo -e "\n$auth_variable=\"$auth_token\"")
+service="default_service"
+auth="default_auth"
 fps=60
 crf=20
 preset=fast
@@ -94,7 +81,11 @@ EOL
 	declare -A existing_config
 	while IFS='=' read -r key value; do
 		[[ "$key" =~ ^#.*$ || -z "$key" || -z "$value" ]] && continue
-		existing_config["$key"]="$value"
+		if [[ "$key" == "e-z_auth" || "$key" == "nest_auth" ]]; then
+			existing_config["auth"]="$value"
+		else
+			existing_config["$key"]="$value"
+		fi
 	done < <(grep -v '^#' "$config_path")
 
 	while IFS= read -r line; do
@@ -104,12 +95,8 @@ EOL
 		fi
 		key=$(echo "$line" | cut -d '=' -f 1)
 		if [[ "$key" == "auth" ]]; then
-			for auth_key in e-z_auth nest_auth; do
-				if [[ -n "${existing_config[$auth_key]}" ]]; then
-					new_config_content+="$auth_key=${existing_config[$auth_key]}"$'\n'
-					unset existing_config["$auth_key"]
-				fi
-			done
+			new_config_content+="$key=${existing_config[$key]}"$'\n'
+			unset existing_config["$key"]
 		elif [[ -z "${existing_config[$key]}" ]]; then
 			new_config_content+="$line"$'\n'
 			updated=true
