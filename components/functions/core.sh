@@ -95,7 +95,11 @@ upload_video() {
 			[[ "$is_gif" == "--gif" && "$upload_mode" != true ]] && rm "$gif_pending_file"
 		else
 			if [[ "$XDG_SESSION_TYPE" != "wayland" || ("$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE") ]]; then
-				[[ "$endnotif" == true ]] && notify-send "Video URL copied to clipboard" -a "VNREZ Recorder" -i link
+				if [[ "$upload_mode" == true ]]; then
+					[[ "$endnotif" == true ]] && notify-send "URL copied to clipboard" -a "VNREZ Recorder" -i link
+				else
+					[[ "$endnotif" == true ]] && notify-send "Video URL copied to clipboard" -a "VNREZ Recorder" -i link
+				fi
 			fi
 		fi
 		if [[ "$save" == false && "$upload_mode" != true ]]; then

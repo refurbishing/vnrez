@@ -4,6 +4,10 @@ source "$SCRIPT_DIR/functions/checks.sh"
 source "$SCRIPT_DIR/functions/misc.sh"
 source "$SCRIPT_DIR/functions/core.sh"
 
+if [ -f "$CONFIG_FILE" ]; then
+	source "$CONFIG_FILE"
+fi
+
 check_dependencies
 check_root
 check_variables

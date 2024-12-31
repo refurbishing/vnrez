@@ -194,9 +194,15 @@ initial_setup() {
 	fi
 
 	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) && "$XDG_SESSION_TYPE" != "x11" ]]; then
-		screen_recorders=("wf-recorder" "wl-screenrec")
-		selected=0
+		screen_recorders=()		
+		if command -v wf-recorder >/dev/null; then
+			screen_recorders+=("wf-recorder")
+		fi
+		if command -v wl-screenrec >/dev/null; then
+			screen_recorders+=("wl-screenrec")
+		fi
 
+		selected=0
 		tput sc
 
 		while true; do
