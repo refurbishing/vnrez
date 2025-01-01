@@ -36,6 +36,7 @@ else
 fi
 
 upload_lockfile="$CONFIG_DIR/.upload.lck"
+upload_pid_file="$CONFIG_DIR/.upload_pid"
 
 if [ "$service" = "e-z" ]; then
 	auth=$ez_auth

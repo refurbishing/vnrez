@@ -4,7 +4,6 @@ source "$SCRIPT_DIR/functions/variables.sh"
 upload_video() {
 	local file=$1
 	local is_gif=$2
-	upload_pid_file="$CONFIG_DIR/.upload_pid"
 
 	if [[ ! -f "$file" ]]; then
 		notify-send "Error: File not found: $file" -a "VNREZ Recorder"
@@ -43,6 +42,7 @@ upload_video() {
 		rm $response_video
 		[[ "$failsave" == true && "$1" != "--abort" && "$upload_mode" != true ]] && mkdir -p ~/Videos/failed && mv "$file" ~/Videos/failed/
 		[[ "$is_gif" == "--gif" ]] && rm "$gif_pending_file"
+		[[ -f "$upload_pid_file" ]] && rm -f "$upload_pid_file"
 		exit 1
 	fi
 
@@ -199,8 +199,8 @@ upload_kooha() {
 
 abort_upload() {
 	local check=false
-	if [[ -f "$(eval echo $HOME/.config/vnrez/.upload_pid)" ]]; then
-		upload_pid=$(cat "$(eval echo $HOME/.config/vnrez/.upload_pid)")
+	if [[ -f "$upload_pid_file" ]]; then
+		upload_pid=$(cat "$upload_pid_file")
 		if kill -0 "$upload_pid" 2>/dev/null; then
 			pkill -P "$upload_pid"
 			kill "$upload_pid"
@@ -222,7 +222,7 @@ abort_upload() {
 					fi
 				fi
 			fi
-			rm "$(eval echo $HOME/.config/vnrez/.upload_pid)"
+			rm "$upload_pid_file"
 			if [[ "$service" == "none" ]]; then
 				[[ "$endnotif" == true ]] && notify-send "Recording Aborted" "The Recording has been aborted." -a "VNREZ Recorder"
 			else
@@ -230,13 +230,13 @@ abort_upload() {
 			fi
 			check=true
 		fi
-	elif [[ -f "$(eval echo $HOME/.config/vnrez/.upload.lck)" ]]; then
-		upload_lock_pid=$(cat "$(eval echo $HOME/.config/vnrez/.upload.lck)")
+	elif [[ -f "$upload_lockfile" ]]; then
+		upload_lock_pid=$(cat "$upload_lockfile")
 		if kill -0 "$upload_lock_pid" 2>/dev/null; then
 			pkill -P "$upload_lock_pid"
 			kill "$upload_lock_pid"
-			if [[ -f "$(eval echo $HOME/.config/vnrez/.upload.lck)" ]]; then
-				rm "$(eval echo $HOME/.config/vnrez/.upload.lck)"
+			if [[ -f "$upload_lockfile" ]]; then
+				rm "$upload_lockfile"
 			fi
 			if [[ "$service" == "none" ]]; then
 				[[ "$endnotif" == true ]] && notify-send "Recording Aborted" "The Recording has been aborted." -a "VNREZ Recorder"
