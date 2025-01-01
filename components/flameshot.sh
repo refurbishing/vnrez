@@ -8,6 +8,10 @@ source "$SCRIPT_DIR/functions/core.sh"
 check_dependencies
 check_root
 
+if [ -f "$CONFIG_FILE" ]; then
+	source "$CONFIG_FILE"
+fi
+
 if [[ "$1" != "auto" && ! -f "$CONFIG_FILE" ]]; then
 	check_variables
 fi

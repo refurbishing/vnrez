@@ -266,6 +266,17 @@ upload_shot() {
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "Authorization: "$auth -w "%{http_code}" -o $response -s "$url")
 	fi
 
+	http_code="${upload_image: -3}"
+	if [[ "$http_code" -ne 200 ]]; then
+		if [[ "$http_code" -eq 403 ]]; then
+			notify-send "Error: Code: $http_code" "Upload failed. API key may be incorrect." -a "Flameshot"
+		else
+			notify-send "Error: Code: $http_code" "Upload failed. Please check the service status." -a "Flameshot"
+		fi
+		rm $temp_file
+		exit 1
+	fi
+
 	if [[ "$service" == "e-z" ]]; then
 		success=$(cat /tmp/upload.json | jq -r ".success")
 		if [[ "$success" != "true" ]] || [[ "$success" == "null" ]]; then
@@ -282,12 +293,10 @@ upload_shot() {
 		fi
 	fi
 
-	if [[ ! "$service" == "e-z" ]]; then
 		if ! jq -e . >/dev/null 2>&1 <$response; then
-			notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
+			notify-send "Error occurred while uploading. Invalid response." -a "Flameshot"
 			rm $temp_file
 			exit 1
-		fi
 	fi
 
 	http_code="${upload_image: -3}"
