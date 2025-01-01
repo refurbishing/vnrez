@@ -19,6 +19,7 @@ create_default_config() {
 	local startnotif=${14}
 	local endnotif=${15}
 	local grimshot=${16}
+	local blast=${17}
 
 	mkdir -p "$CONFIG_DIR"
 
@@ -37,6 +38,7 @@ startnotif=$startnotif
 endnotif=$endnotif
 
 grimshot=$grimshot
+blast=$blast
 
 wlscreenrec=$wlscreenrec
 codec=$codec
@@ -58,28 +60,29 @@ update_config() {
 
 	local default_config_content=$(
 		cat <<EOL
-service="default_service"
-auth="default_auth"
-fps=60
-crf=20
-preset=fast
-pixelformat=yuv420p
-encoder=libx264
-save=false
-failsave=true
-colorworkaround=false
-startnotif=true
-endnotif=true
+service=
+auth=
+fps=
+crf=
+preset=
+pixelformat=
+encoder=
+save=
+failsave=
+colorworkaround=
+startnotif=
+endnotif=
 
-grimshot=false
+grimshot=
+blast=
 
-wlscreenrec=false
-codec=auto
-extpixelformat=nv12
-bitrate="5 MB"
+wlscreenrec=
+codec=
+extpixelformat=
+bitrate=
 
-directory="~/Videos"
-kooha_dir="~/Videos/Kooha"
+directory=
+kooha_dir=
 EOL
 	)
 

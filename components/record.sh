@@ -33,16 +33,6 @@ getdate() {
 getaudiooutput() {
 	pactl list sources | grep 'Name' | grep 'monitor' | cut -d ' ' -f2
 }
-getactivemonitor() {
-	if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
-		active_monitor=$(xdpyinfo | grep dimensions | awk '{print $2}')
-	elif [[ "$XDG_SESSION_TYPE" == "wayland" && "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-		active_monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
-	else
-		active_monitor=$(wlr-randr --json | jq -r '.[] | select(.enabled == true) | .name')
-	fi
-	echo "$active_monitor"
-}
 
 gif() {
 	local video_file=$1

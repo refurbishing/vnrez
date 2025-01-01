@@ -1,5 +1,29 @@
 help() {
-	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" && "$XDG_CURRENT_DESKTOP" != "X-Cinnamon" && "$XDG_SESSION_TYPE" != "X11" && "$grimshot" == true && "$blast" == false ]]; then
+		echo ""
+		echo "OPTIONS:"
+		echo "  --help, -h             Show this help message and exit"
+		echo "  config                 Open the configuration file in the default text editor"
+		echo "  reinstall              Reinstall the configuration file with default settings"
+		echo "  upload, -u             Upload specified video files (mp4, mkv, webm, gif)"
+		echo "  auto                   Run with default settings without using a config file"
+		echo ""
+		echo "shot:" 
+		echo "  --output               Make a screenshot of the current output"
+		echo "  --area                 Make a selected region screenshot"
+		echo ""
+		echo "record:"
+		echo "  --sound                Record a selected region with sound"
+		echo "  --fullscreen-sound     Record the entire screen with sound"
+		echo "  --fullscreen           Record the entire screen without sound"
+		echo "  --no-sound, (none)     Record a selected region without sound"
+		echo "  --gif                  Record a selected region and convert to GIF"
+		echo "  --abort                Abort the current recording"
+		echo ""
+		exit 0
+	fi
+
+	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
 		echo "Usage: vnrez(.sh) [CASE] [ARGUMENTS]"
 		echo ""
 		echo "OPTIONS:"
@@ -75,6 +99,17 @@ help() {
 		echo ""
 		exit 0
 	fi
+}
+
+getactivemonitor() {
+	if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
+		active_monitor=$(xdpyinfo | grep dimensions | awk '{print $2}')
+	elif [[ "$XDG_SESSION_TYPE" == "wayland" && "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+		active_monitor=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
+	else
+		active_monitor=$(wlr-randr --json | jq -r '.[] | select(.enabled == true) | .name')
+	fi
+	echo "$active_monitor"
 }
 
 logo() {

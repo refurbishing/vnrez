@@ -60,11 +60,18 @@ check_dependencies() {
 				missing_dependencies+=("kooha or io.github.seadve.Kooha (Flatpak)")
 			fi
 		elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-			if ! command -v "flameshot" &>/dev/null; then
-				dependencies+=("hyprpicker" "grim")
+			if ! command -v "flameshot" &>/dev/null && ! command -v "grim" &>/dev/null && ! command -v "hyprpicker" &>/dev/null; then
+				dependencies+=("flameshot or grim (with hyprpicker)")
 			fi
 		else
-			dependencies+=("flameshot" "wl-copy" "slurp" "wlr-randr")
+			if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
+				if ! command -v "flameshot" &>/dev/null && ! command -v "grim" &>/dev/null; then
+					if [[ "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" && "$XDG_CURRENT_DESKTOP" != "X-Cinnamon" && "$XDG_CURRENT_DESKTOP" != "Hyprland" ]]; then
+						dependencies+=("flameshot or grim")
+					fi
+				fi
+			fi
+			dependencies+=("wl-copy" "slurp" "wlr-randr")
 			if ! command -v "wf-recorder" &>/dev/null && ! command -v "wl-screenrec" &>/dev/null; then
 				missing_dependencies+=("wf-recorder or wl-screenrec")
 			fi

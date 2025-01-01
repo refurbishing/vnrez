@@ -192,8 +192,8 @@ initial_setup() {
 	if command -v flameshot >/dev/null; then
 		screenshot_tools+=("flameshot")
 	fi
-	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] && command -v grim >/dev/null && command -v hyprpicker >/dev/null; then
-		screenshot_tools+=("grimblast")
+	if command -v grim >/dev/null; then
+		screenshot_tools+=("grimshot")
 	fi
 
 	selected=0
@@ -236,8 +236,21 @@ initial_setup() {
 		esac
 	done
 
-	if [[ "$screenshot_tool" == "grimblast" ]]; then
+	if [[ "$screenshot_tool" == "grimshot" ]]; then
 		grimshot=true
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+			echo -ne "\e[33mWould you like to use grimblast? (Y/N):\e[0m "
+			tput cnorm
+			read -r user_choice
+
+			if [[ "$user_choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+				blast=true
+			else
+				blast=false
+			fi
+		else
+			blast=false
+		fi
 	else
 		grimshot=false
 	fi
@@ -458,7 +471,7 @@ initial_setup() {
 		fi
 	fi
 
-	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot"
+	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast"
 	}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
@@ -494,8 +507,11 @@ if [[ ! -f "$CONFIG_FILE" && ! ("$1" == "auto" && ("$2" == "record" || "$2" == "
 	initial_setup
 fi
 
-if [[ "$1" == "auto" || -f "$CONFIG_FILE" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] && command -v hyprpicker >/dev/null && command -v grim >/dev/null && ! command -v flameshot >/dev/null; then
-	grimshot=true
+if [[ "$1" == "auto" ]] || [[ -f "$CONFIG_FILE" && "$XDG_CURRENT_DESKTOP" == "Hyprland" && $(command -v grim) && ! $(command -v flameshot) ]]; then
+    grimshot=true
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+        blast=true
+    fi
 fi
 
 if [[ -f "$CONFIG_FILE" ]]; then
@@ -644,17 +660,21 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 	tput cnorm
 	if [[ "$choice" == "record" ]]; then
 		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
-			sub_options=("none" "gif" "abort" "ǀ" "↩" "⨯")
+			base_options=("none" "gif" "abort")
 		else
-			sub_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort" "ǀ" "↩" "⨯")
+			base_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort")
 		fi
 	elif [[ "$choice" == "shot" ]]; then
-		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
-			sub_options=("area" "screen" "active" "output" "ǀ" "↩" "⨯")
-		else
-			sub_options=("gui" "screen" "full" "ǀ" "↩" "⨯")
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
+			base_options=("area" "screen" "active" "output")
+		elif [[ "$grimshot" == true && "$blast" == false ]]; then
+			base_options=("area" "output")
+		elif [[ "$grimshot" == false ]]; then
+			base_options=("gui" "screen" "full")
 		fi
 	fi
+	
+	sub_options=("${base_options[@]}" "ǀ" "↩" "⨯")
 
 	selected=0
 	tput clear
@@ -754,12 +774,24 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
 		fi
 	elif [[ "$choice" == "shot" ]]; then
-		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
-			sleep 0.5
-			"$SCRIPT_DIR/components/grimshot.sh" "--$sub_choice" &>/dev/null
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+			fi
 		else
-			sleep 0.5
-			"$SCRIPT_DIR/components/flameshot.sh" "--$sub_choice" &>/dev/null
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+			fi
+		fi
+	else
+		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+			"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+		else
+			"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
 		fi
 	fi
 	sleep 0.2
@@ -776,7 +808,13 @@ if [[ "$1" == "upload" || "$1" == "-u" || ( "$1" == "auto" && "$2" == "upload" |
 fi
 
 if [[ "$1" == "shot" || "$2" == "shot" ]]; then
-	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
+	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
+		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+			"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+		else
+			"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+		fi
+	elif [[ "$grimshot" == true && "$blast" == false ]]; then
 		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 			"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
 		else

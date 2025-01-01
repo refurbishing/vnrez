@@ -61,11 +61,16 @@ valid_cases=(
     "record"
 )
 
-if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] && [ "$grimshot" = true ]; then
+if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] && [[ "$grimshot" = true && "$blast" = true ]]; then
     shot_args=(
         "--output"
         "--screen"
         "--active"
+        "--area"
+    )
+elif [[ "$grimshot" = true && "$blast" = false ]]; then
+    shot_args=(
+        "--screen"
         "--area"
     )
 else
