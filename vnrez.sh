@@ -780,11 +780,17 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			else
 				"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
 			fi
-		else
+		elif [[ "$grimshot" == true && "$blast" == false ]]; then
 			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 				"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
 			else
 				"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+			fi
+		elif [[ "$grimshot" == false ]]; then
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
 			fi
 		fi
 	else
