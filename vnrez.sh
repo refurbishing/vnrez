@@ -188,6 +188,60 @@ initial_setup() {
 		done
 	fi
 
+	screenshot_tools=()
+	if command -v flameshot >/dev/null; then
+		screenshot_tools+=("flameshot")
+	fi
+	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] && command -v grim >/dev/null && command -v hyprpicker >/dev/null; then
+		screenshot_tools+=("grimblast")
+	fi
+
+	selected=0
+	tput sc
+
+	while true; do
+		trap handle_resize SIGWINCH
+		tput rc
+		tput civis
+		tput el
+		echo -e "\e[33mChoose your screenshot tool:\e[0m"
+		for i in "${!screenshot_tools[@]}"; do
+			if [[ $i -eq $selected ]]; then
+				echo -e "\e[32m• ${screenshot_tools[$i]}\e[0m"
+			else
+				echo "◦ ${screenshot_tools[$i]}"
+			fi
+		done
+
+		read -rsn1 input
+		case $input in
+		$'\x1b')
+			read -rsn2 -t 0.1 input
+			if [[ $input == "[A" ]]; then
+				((selected--))
+				if [[ $selected -lt 0 ]]; then
+					selected=$((${#screenshot_tools[@]} - 1))
+				fi
+			elif [[ $input == "[B" ]]; then
+				((selected++))
+				if [[ $selected -ge ${#screenshot_tools[@]} ]]; then
+					selected=0
+				fi
+			fi
+			;;
+		"")
+			screenshot_tool=${screenshot_tools[$selected]}
+			break
+			;;
+		esac
+	done
+
+	if [[ "$screenshot_tool" == "grimblast" ]]; then
+		grimshot=true
+	else
+		grimshot=false
+	fi
+
 	if [[ "$prompt_service" == true ]]; then
 		create_default_config "$service" "$auth_token"
 		return
@@ -404,10 +458,8 @@ initial_setup() {
 		fi
 	fi
 
-	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif"
-}
-
-check_dependencies
+	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot"
+	}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
 	if [[ ! -f "$CONFIG_FILE" ]]; then
@@ -440,6 +492,10 @@ fi
 
 if [[ ! -f "$CONFIG_FILE" && ! ("$1" == "auto" && ("$2" == "record" || "$2" == "shot" )) ]]; then
 	initial_setup
+fi
+
+if [[ "$1" == "auto" || -f "$CONFIG_FILE" ]] && [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]] && command -v hyprpicker >/dev/null && command -v grim >/dev/null && ! command -v flameshot >/dev/null; then
+	grimshot=true
 fi
 
 if [[ -f "$CONFIG_FILE" ]]; then
@@ -593,7 +649,11 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			sub_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort" "ǀ" "↩" "⨯")
 		fi
 	elif [[ "$choice" == "shot" ]]; then
-		sub_options=("gui" "screen" "full" "ǀ" "↩" "⨯")
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
+			sub_options=("area" "screen" "active" "output" "ǀ" "↩" "⨯")
+		else
+			sub_options=("gui" "screen" "full" "ǀ" "↩" "⨯")
+		fi
 	fi
 
 	selected=0
@@ -694,8 +754,13 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
 		fi
 	elif [[ "$choice" == "shot" ]]; then
-		sleep 0.5
-		"$SCRIPT_DIR/components/shot.sh" "--$sub_choice" &>/dev/null
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
+			sleep 0.5
+			"$SCRIPT_DIR/components/grimshot.sh" "--$sub_choice" &>/dev/null
+		else
+			sleep 0.5
+			"$SCRIPT_DIR/components/flameshot.sh" "--$sub_choice" &>/dev/null
+		fi
 	fi
 	sleep 0.2
 	exec "$0" "$@"
@@ -711,10 +776,18 @@ if [[ "$1" == "upload" || "$1" == "-u" || ( "$1" == "auto" && "$2" == "upload" |
 fi
 
 if [[ "$1" == "shot" || "$2" == "shot" ]]; then
-	if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-		"$SCRIPT_DIR/components/shot.sh" auto "${@:2}"
+	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true ]]; then
+		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+			"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
+		else
+			"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+		fi
 	else
-		"$SCRIPT_DIR/components/shot.sh" "${@:2}"
+		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+			"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+		else
+			"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
+		fi
 	fi
 	exit 0
 fi

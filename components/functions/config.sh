@@ -18,7 +18,8 @@ create_default_config() {
 	local encoder=${13}
 	local startnotif=${14}
 	local endnotif=${15}
-	
+	local grimshot=${16}
+
 	mkdir -p "$CONFIG_DIR"
 
 	cat >"$CONFIG_FILE" <<EOL
@@ -34,6 +35,8 @@ failsave=$failsave
 colorworkaround=false
 startnotif=$startnotif
 endnotif=$endnotif
+
+grimshot=$grimshot
 
 wlscreenrec=$wlscreenrec
 codec=$codec
@@ -68,6 +71,8 @@ colorworkaround=false
 startnotif=true
 endnotif=true
 
+grimshot=false
+
 wlscreenrec=false
 codec=auto
 extpixelformat=nv12
@@ -81,7 +86,7 @@ EOL
 	declare -A existing_config
 	while IFS='=' read -r key value; do
 		[[ "$key" =~ ^#.*$ || -z "$key" || -z "$value" ]] && continue
-		if [[ "$key" == "e-z_auth" || "$key" == "nest_auth" ]]; then
+		if [[ "$key" == "ez_auth" || "$key" == "nest_auth" ]]; then
 			existing_config["auth"]="$value"
 		else
 			existing_config["$key"]="$value"

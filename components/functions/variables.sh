@@ -60,11 +60,20 @@ valid_cases=(
     "record"
 )
 
-shot_args=(
-    "--gui"
-    "--full"
-    "--screen"
-)
+if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] && [ "$grimshot" = true ]; then
+    shot_args=(
+        "--output"
+        "--screen"
+        "--active"
+        "--area"
+    )
+else
+    shot_args=(
+        "--gui"
+        "--full"
+        "--screen"
+    )
+fi
 
 record_args=(
     "--sound"

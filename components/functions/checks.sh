@@ -51,22 +51,26 @@ check_variables() {
 
 check_dependencies() {
 	local missing_dependencies=()
-	local dependencies=("jq" "curl" "flameshot")
+	local dependencies=("jq" "curl")
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
 		if [[ "$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon" ]]; then
-			dependencies+=("wl-copy")
+			dependencies+=("flameshot" "wl-copy")
 			if ! command -v "kooha" &>/dev/null && ! flatpak list | grep -q "io.github.seadve.Kooha"; then
 				missing_dependencies+=("kooha or io.github.seadve.Kooha (Flatpak)")
 			fi
+		elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+			if ! command -v "flameshot" &>/dev/null; then
+				dependencies+=("hyprpicker" "grim")
+			fi
 		else
-			dependencies+=("wl-copy" "slurp" "wlr-randr")
+			dependencies+=("flameshot" "wl-copy" "slurp" "wlr-randr")
 			if ! command -v "wf-recorder" &>/dev/null && ! command -v "wl-screenrec" &>/dev/null; then
 				missing_dependencies+=("wf-recorder or wl-screenrec")
 			fi
 		fi
 	else
-		dependencies+=("xclip" "slop" "ffmpeg" "xdpyinfo")
+		dependencies+=("flameshot" "xclip" "slop" "ffmpeg" "xdpyinfo")
 	fi
 
 	for dep in "${dependencies[@]}"; do

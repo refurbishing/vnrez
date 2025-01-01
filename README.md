@@ -13,6 +13,8 @@
 - **COSMIC & GNOME / KDE Wayland**: `jq`, `wl-clipboard` & `kooha` or `io.github.seadve.Kooha`
 - **X11**: `jq`, `xclip`, `slop` & `ffmpeg`
 
+- **Screenshot**: `flameshot` or `grimblast` (not package)
+
 <details>
 <summary>How to install them?</summary>
 
@@ -100,7 +102,7 @@ Now paste that API KEY when doing the initial setup.
 - `endnotif` show the end notification or not
 - `directory` set directory to save videos in there will be ignored if using kooha
 - `kooha_dir` set the kooha directory also save videos in here if using kooha
-
+- `grimshot` set to true if want to use grimblast (hyprland only)
 ##### ☆ When using Kooha, some of these arguments are unnecessary as they are not supported or required.
 
 ## Credits
