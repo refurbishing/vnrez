@@ -683,13 +683,28 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			base_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort")
 		fi
 	elif [[ "$choice" == "shot" ]]; then
+		acquire_lock
 		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
-			base_options=("area" "screen" "active" "output")
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+			fi
 		elif [[ "$grimshot" == true && "$blast" == false ]]; then
-			base_options=("area" "output")
-		elif [[ "$grimshot" == false ]]; then
-			base_options=("gui" "screen" "full")
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+			fi
+		else
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
+			fi
 		fi
+		release_lock
+		exit 0
 	fi
 	
 	sub_options=("${base_options[@]}" "ǀ" "↩" "⨯")
@@ -832,6 +847,7 @@ if [[ "$1" == "upload" || "$1" == "-u" || ( "$1" == "auto" && "$2" == "upload" |
 fi
 
 if [[ "$1" == "shot" || "$2" == "shot" ]]; then
+	acquire_lock
 	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
 		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 			"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
@@ -851,30 +867,30 @@ if [[ "$1" == "shot" || "$2" == "shot" ]]; then
 			"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
 		fi
 	fi
+	release_lock
 	exit 0
 fi
 
 if [[ "$1" == "record" || "$2" == "record" ]]; then
+	acquire_lock
 	if [[ "$2" == "--abort" ]]; then
 		"$SCRIPT_DIR/components/record.sh" "${@:2}"
 	elif [[ "$1" == "auto" || "$2" == "record" && ! -f "$CONFIG_FILE" ]]; then
 		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
 			"$SCRIPT_DIR/components/record.sh" auto
+			release_lock
 			exit 0
 		else
 			if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
 				"$SCRIPT_DIR/components/record.sh"
+				release_lock
 				exit 0
 			fi
 		fi
 		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" || "$2" == "record" ]]; then
-			acquire_lock
-			trap release_lock EXIT
 			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
 		fi
 	else
-		acquire_lock
-		trap release_lock EXIT
 		"$SCRIPT_DIR/components/record.sh" "${@:2}"
 	fi
 	release_lock

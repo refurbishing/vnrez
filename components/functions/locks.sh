@@ -10,8 +10,11 @@ acquire_lock() {
 	else
 		echo $$ >"$lockfile"
 	fi
+	trap release_lock EXIT
 }
 
 release_lock() {
-	rm -f "$lockfile"
+	if [[ -f "$lockfile" && $(cat "$lockfile") == $$ ]]; then
+		rm -f "$lockfile"
+	fi
 }
