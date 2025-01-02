@@ -5,12 +5,12 @@ source "$SCRIPT_DIR/functions/checks.sh"
 source "$SCRIPT_DIR/functions/misc.sh"
 source "$SCRIPT_DIR/functions/core.sh"
 
-check_dependencies
-check_root
-
 if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
+
+check_dependencies
+check_root
 
 if [[ "$1" != "auto" && -f "$CONFIG_FILE" ]]; then
 	check_variables
@@ -25,10 +25,6 @@ if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 	crf=20
 	preset=fast
 	shift
-fi
-
-if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; then
-	help
 fi
 
 getdate() {
@@ -66,7 +62,7 @@ else
 	fi
 fi
 
-if [[ "$1" == "--abort" ]]; then
+if [[ "$1" == "--abort" || ( "$1" == "auto" && "$2" == "--abort" ) ]]; then
 	if [[ "$upload_mode" == true ]]; then
 		abort_upload
 	fi
@@ -128,8 +124,8 @@ if [[ "$1" == "--abort" ]]; then
 	fi
 fi
 
-if [[ -z "$1" || "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "--fullscreen" || "$1" == "--gif" || "$1" == "--no-sound" || -z "$2" || "$2" == "--sound" || "$2" == "--fullscreen-sound" || "$2" == "--fullscreen" || "$2" == "--gif" || "$2" == "--no-sound" ]]; then
-	if [[ "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "--fullscreen" || "$1" == "--no-sound" || "$2" == "--sound" || "$2" == "--fullscreen-sound" || "$2" == "--fullscreen" || "$2" == "--no-sound" ]]; then
+if [[ -z "$1" || "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "--fullscreen" || "$1" == "--gif" || "$1" == "--no-sound" || ( "$1" == "auto" && ( -z "$2" || "$2" == "--sound" || "$2" == "--fullscreen-sound" || "$2" == "--fullscreen" || "$2" == "--gif" || "$2" == "--no-sound" )) ]]; then
+	if [[ "$1" == "--sound" || "$1" == "--fullscreen-sound" || "$1" == "--fullscreen" || "$1" == "--no-sound" || ( "$1" == "auto" && ( "$2" == "--sound" || "$2" == "--fullscreen-sound" || "$2" == "--fullscreen" || "$2" == "--no-sound" )) ]]; then
 		if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 			printf "\e[30m\e[46m$1\e[0m"
 			printf "\e[1;32m is only for X11 or wlroots Compositors as its not needed. \e[0m\n"
@@ -146,7 +142,7 @@ else
 	fi
 fi
 
-if [[ "$1" == "--gif" || "$2" == "--gif" ]]; then
+if [[ "$1" == "--gif" || ( "$1" == "auto" && "$2" == "--gif" ) ]]; then
 	touch "$gif_pending_file"
 fi
 
@@ -180,7 +176,7 @@ if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || 
 else
 	if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
 		if pgrep ffmpeg >/dev/null; then
-			if [[ -f "$gif_pending_file" || "$1" == "--gif" || "$2" == "--gif" ]]; then
+			if [[ -f "$gif_pending_file" || "$1" == "--gif" || ( "$1" == "auto" && "$2" == "--gif" ) ]]; then
 				[[ "$endnotif" == true ]] && notify-send -t 5000 "Recording is being converted to GIF" "Please Wait.." -a "VNREZ Recorder" &
 				pkill ffmpeg &
 				wait
@@ -197,7 +193,7 @@ else
 				upload_video "$video_file"
 			fi
 		else
-			if [[ "$1" == "--sound" || "$2" == "--sound" ]]; then
+			if [[ "$1" == "--sound" || ( "$1" == "auto" && "$2" == "--sound" ) ]]; then
 				[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 				region=$(slop -f "%x,%y %w,%h")
 				if [[ -z "$region" ]]; then
@@ -207,7 +203,7 @@ else
 				IFS=', ' read -r x y width height <<<"$region"
 				ffmpeg -video_size "${width}x${height}" -framerate $fps -f x11grab -i $DISPLAY+"${x},${y}" -f pulse -i "$(getaudiooutput)" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart -c:a aac -b:a 128k './recording_'"$(getdate)"'.mp4' &
 				disown
-			elif [[ "$1" == "--fullscreen-sound" || "$2" == "--fullscreen-sound" ]]; then
+			elif [[ "$1" == "--fullscreen-sound" || ( "$1" == "auto" && "$2" == "--fullscreen-sound" ) ]]; then
 				if [[ "$save" == true ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 				else
@@ -215,7 +211,7 @@ else
 				fi
 				ffmpeg -video_size $(getactivemonitor) -framerate $fps -f x11grab -i $DISPLAY -f pulse -i "$(getaudiooutput)" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart -c:a aac -b:a 128k './recording_'"$(getdate)"'.mp4' &
 				disown
-			elif [[ "$1" == "--fullscreen" || "$2" == "--fullscreen" ]]; then
+			elif [[ "$1" == "--fullscreen" || ( "$1" == "auto" && "$2" == "--fullscreen" ) ]]; then
 				if [[ "$save" == true ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 				else
@@ -223,7 +219,7 @@ else
 				fi
 				ffmpeg -video_size $(getactivemonitor) -framerate $fps -f x11grab -i $DISPLAY -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart './recording_'"$(getdate)"'.mp4' &
 				disown
-			elif [[ "$1" == "--gif" || "$2" == "--gif" ]]; then
+			elif [[ "$1" == "--gif" || ( "$1" == "auto" && "$2" == "--gif" ) ]]; then
 				touch "$gif_pending_file"
 				[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 				region=$(slop -f "%x,%y %w,%h")
@@ -249,7 +245,7 @@ else
 	else
 		recorder_command=$(get_recorder_command)
 		if pgrep "$recorder_command" >/dev/null; then
-			if [[ -f "$gif_pending_file" || "$1" == "--gif" || "$2" == "--gif" ]]; then
+			if [[ -f "$gif_pending_file" || "$1" == "--gif" || ( "$1" == "auto" && "$2" == "--gif" ) ]]; then
 				[[ "$endnotif" == true ]] && notify-send -t 5000 "Recording is being converted to GIF" "Please Wait.." -a "VNREZ Recorder" &
 				pkill "$recorder_command" &
 				wait
@@ -258,7 +254,7 @@ else
 				gif_file=$(gif "$video_file")
 				upload_video "$gif_file" "--gif"
 			else
-				if [[ -z "$1" || "$1" == "--no-sound" || -z "$2" || "$2" == "--no-sound" ]]; then
+				if [[ -z "$1" || "$1" == "--no-sound" || ( "$1" == "auto" && ( -z "$2" || "$2" == "--no-sound" )) ]]; then
 					[[ "$endnotif" == true ]] && notify-send -t 2000 "Recording Stopped" "Stopped" -a "VNREZ Recorder" &
 					pkill "$recorder_command" &
 					wait
@@ -270,7 +266,7 @@ else
 			fi
 		else
 			if [[ "$wlscreenrec" == true ]]; then
-				if [[ "$1" == "--sound" || "$2" == "--sound" ]]; then
+				if [[ "$1" == "--sound" || ( "$1" == "auto" && "$2" == "--sound" ) ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
 					if [[ -z "$region" ]]; then
@@ -283,7 +279,7 @@ else
 						wl-screenrec --geometry "$region" --audio --audio-device "$(getaudiooutput)" -f "./recording_$(getdate).mp4" &
 					fi
 					disown
-				elif [[ "$1" == "--fullscreen-sound" || "$2" == "--fullscreen-sound" ]]; then
+				elif [[ "$1" == "--fullscreen-sound" || ( "$1" == "auto" && "$2" == "--fullscreen-sound" ) ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
@@ -296,7 +292,7 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-				elif [[ "$1" == "--fullscreen" || "$2" == "--fullscreen" ]]; then
+				elif [[ "$1" == "--fullscreen" || ( "$1" == "auto" && "$2" == "--fullscreen" ) ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
@@ -309,7 +305,7 @@ else
 					command+=" -f './recording_'"$(getdate)"'.mp4'"
 					eval "$command" &
 					disown
-				elif [[ "$1" == "--gif" || "$2" == "--gif" ]]; then
+				elif [[ "$1" == "--gif" || ( "$1" == "auto" && "$2" == "--gif" ) ]]; then
 					touch "$gif_pending_file"
 					[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
@@ -340,7 +336,7 @@ else
 					disown
 				fi
 			else
-				if [[ "$1" == "--sound" || "$2" == "--sound" ]]; then
+				if [[ "$1" == "--sound" || ( "$1" == "auto" && "$2" == "--sound" ) ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
 					if [[ -z "$region" ]]; then
@@ -349,7 +345,7 @@ else
 					fi
 					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" --audio="$(getaudiooutput)" -r $fps &
 					disown
-				elif [[ "$1" == "--fullscreen-sound" || "$2" == "--fullscreen-sound" ]]; then
+				elif [[ "$1" == "--fullscreen-sound" || ( "$1" == "auto" && "$2" == "--fullscreen-sound" ) ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
@@ -357,7 +353,7 @@ else
 					fi
 					"$recorder_command" -o $(getactivemonitor) --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --audio="$(getaudiooutput)" -r $fps &
 					disown
-				elif [[ "$1" == "--fullscreen" || "$2" == "--fullscreen" ]]; then
+				elif [[ "$1" == "--fullscreen" || ( "$1" == "auto" && "$2" == "--fullscreen" ) ]]; then
 					if [[ "$save" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
@@ -365,7 +361,7 @@ else
 					fi
 					"$recorder_command" -o $(getactivemonitor) --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' -r $fps &
 					disown
-				elif [[ "$1" == "--gif" || "$2" == "--gif" ]]; then
+				elif [[ "$1" == "--gif" || ( "$1" == "auto" && "$2" == "--gif" ) ]]; then
 					touch "$gif_pending_file"
 					[[ "$startnotif" == true ]] && notify-send "GIF Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 					region=$(slurp)
@@ -376,7 +372,7 @@ else
 					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" -r $fps &
 					disown
 				else
-					if [[ -z "$1" || "$1" == "--no-sound" || -z "$2" || "$2" == "--no-sound" ]]; then
+					if [[ -z "$1" || "$1" == "--no-sound" || ( "$1" == "auto" && ( -z "$2" || "$2" == "--no-sound" )) ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Screen Snip Recording" "Select the region to Start" -a "VNREZ Recorder"
 						region=$(slurp)
 						if [[ -z "$region" ]]; then

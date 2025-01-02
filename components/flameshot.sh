@@ -5,14 +5,14 @@ source "$SCRIPT_DIR/functions/checks.sh"
 source "$SCRIPT_DIR/functions/misc.sh"
 source "$SCRIPT_DIR/functions/core.sh"
 
-check_dependencies
-check_root
-
 if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-if [[ "$1" != "auto" && ! -f "$CONFIG_FILE" ]]; then
+check_dependencies
+check_root
+
+if [[ "$1" != "auto" && -f "$CONFIG_FILE" ]]; then
 	check_variables
 fi
 
@@ -26,10 +26,6 @@ if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 	service="none"
 	endnotif="true"
 	shift
-fi
-
-if [[ "$1" == "--help" || "$1" == "-h" || "$2" == "--help" || "$2" == "-h" ]]; then
-	help
 fi
 
 if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then

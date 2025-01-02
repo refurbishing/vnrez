@@ -6,16 +6,20 @@ source "$SCRIPT_DIR/functions/variables.sh"
 source "$SCRIPT_DIR/functions/checks.sh"
 source "$SCRIPT_DIR/functions/core.sh"
 
+if [ -f "$CONFIG_FILE" ]; then
+	source "$CONFIG_FILE"
+fi
+
 check_dependencies
 check_root
+
+if [[ "$1" != "auto" && -f "$CONFIG_FILE" ]]; then
+	check_variables
+fi
 
 if [[ "$XDG_CURRENT_DESKTOP" != "Hyprland" ]]; then
 		echo "Error: This grimblast variant is intended to be used only on Hyprland."
 		exit 1
-fi
-
-if [ -f "$CONFIG_FILE" ]; then
-	source "$CONFIG_FILE"
 fi
 
 if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
