@@ -253,6 +253,7 @@ initial_setup() {
 		fi
 	else
 		grimshot=false
+		blast=false
 	fi
 
 	if [[ "$prompt_service" == true ]]; then
@@ -325,7 +326,7 @@ initial_setup() {
 			echo -e "\e[31mFPS must be a number and cannot exceed 244. Please enter a valid FPS:\e[0m"
 			echo -n "✦ ) "
 			read -r fps
-			sleep 0.2
+			sleep 0.1
 		done
 	fi
 
@@ -333,20 +334,22 @@ initial_setup() {
 		echo -e "\e[33mDo you want to save recordings? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r save_recordings
+		sleep 0.1
 		if [[ "$save_recordings" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 			save=true
 			echo -e "\e[33mEnter the directory to save files (You need to set it on Kooha too) (default is ~/Videos/Kooha) :\e[0m"
 			echo -n "✦ ) "
 			read -r kooha_dir
+			sleep 0.1
 			kooha_dir=${kooha_dir:-"$HOME/Videos/Kooha"}
 			while [[ ! -d "$kooha_dir" || "$kooha_dir" == "/" || "$kooha_dir" != "$HOME"* ]]; do
 				echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
 				echo -n "✦ ) "
 				read -r kooha_dir
+				sleep 0.1
 				if [[ "$kooha_dir" == "~"* ]]; then
 					kooha_dir="$HOME${kooha_dir:1}"
 				fi
-				sleep 0.2
 			done
 		fi
 	fi
@@ -356,6 +359,7 @@ initial_setup() {
 			echo -e "\e[33mDo you want to enable failsave? (Y/N):\e[0m"
 			echo -n "✦ ) "
 			read -r failsave_option
+			sleep 0.1
 			if [[ "$failsave_option" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 				failsave=true
 			else
@@ -368,19 +372,20 @@ initial_setup() {
 		echo -e "\e[33mEnter the desired CRF (default is 20):\e[0m"
 		echo -n "✦ ) "
 		read -r crf
+		sleep 0.1
 		crf=${crf:-20}
 		while ! [[ "$crf" =~ ^[0-9]+$ ]] || [[ $crf -gt 100 ]]; do
 			echo -e "\e[31mCRF must be a number and cannot exceed 100. Please enter a valid CRF:\e[0m"
 			echo -n "✦ ) "
 			read -r crf
-			sleep 0.2
+			sleep 0.1
 		done
 	fi
 	if [[ "$wlscreenrec" == false || "$XDG_SESSION_TYPE" == "x11" ]]; then
 		echo -e "\e[33mEnter the desired preset (default is fast):\e[0m"
 		echo -n "✦ ) "
 		read -r preset
-		sleep 0.2
+		sleep 0.1
 		preset=${preset:-fast}
 	fi
 
@@ -388,7 +393,7 @@ initial_setup() {
 		echo -e "\e[33mEnter the desired pixel format (default is yuv420p):\e[0m"
 		echo -n "✦ ) "
 		read -r pixelformat
-		sleep 0.2
+		sleep 0.1
 		pixelformat=${pixelformat:-yuv420p}
 	fi
 
@@ -396,7 +401,7 @@ initial_setup() {
 		echo -e "\e[33mEnter the desired pixel format (default is nv12):\e[0m"
 		echo -n "✦ ) "
 		read -r extpixelformat
-		sleep 0.2
+		sleep 0.1
 		extpixelformat=${extpixelformat:-nv12}
 	fi
 
@@ -404,7 +409,7 @@ initial_setup() {
 		echo -e "\e[33mEnter the desired encoder (default is libx264):\e[0m"
 		echo -n "✦ ) "
 		read -r encoder
-		sleep 0.2
+		sleep 0.1
 		encoder=${encoder:-libx264}
 	fi
 
@@ -412,28 +417,38 @@ initial_setup() {
 		echo -e "\e[33mEnter the desired codec (default is auto):\e[0m"
 		echo -n "✦ ) "
 		read -r codec
-		sleep 0.2
+		sleep 0.1
 		codec=${codec:-auto}
+	fi
+
+	if [[ "$wlscreenrec" == true ]]; then
+		echo -e "\e[33mEnter the desired bitrate (default is 5 mb):\e[0m"
+		echo -n "✦ ) "
+		read -r bitrate
+		sleep 0.1
+		bitrate=${bitrate:-5 mb}
 	fi
 
 	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 		echo -e "\e[33mDo you want to save recordings? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r save_recordings
+		sleep 0.1
 		if [[ "$save_recordings" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 			save=true
 			echo -e "\e[33mEnter the directory to save files (default is ~/Videos):\e[0m"
 			echo -n "✦ ) "
 			read -r directory
+			sleep 0.1
 			directory=${directory:-"$HOME/Videos"}
 			while [[ ! -d "$directory" || "$directory" == "/" || "$directory" != "$HOME"* ]]; do
 				echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
 				echo -n "✦ ) "
 				read -r directory
+				sleep 0.1
 				if [[ "$directory" == "~"* ]]; then
 					directory="$HOME${directory:1}"
 				fi
-				sleep 0.2
 			done
 		fi
 
@@ -441,6 +456,7 @@ initial_setup() {
 			echo -e "\e[33mDo you want to enable failsave? (Y/N):\e[0m"
 			echo -n "✦ ) "
 			read -r failsave_option
+			sleep 0.1
 			if [[ "$failsave_option" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 				failsave=true
 			else
@@ -453,6 +469,7 @@ initial_setup() {
 		echo -e "\e[33mDo you want to have start notifications? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r startnotif
+		sleep 0.1
 		if [[ -z "$startnotif" || "$startnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 			startnotif=true
 		else
@@ -464,6 +481,7 @@ initial_setup() {
 		echo -e "\e[33mDo you want to have end notifications? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r endnotif
+		sleep 0.1
 		if [[ -z "$endnotif" || "$endnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 			endnotif=true
 		else
@@ -471,7 +489,7 @@ initial_setup() {
 		fi
 	fi
 
-	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast"
+	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate"
 	}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then

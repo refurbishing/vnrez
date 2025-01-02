@@ -62,27 +62,26 @@ update_config() {
 		cat <<EOL
 service=
 auth=
-fps=
-crf=
-preset=
-pixelformat=
-encoder=
-save=
-failsave=
-colorworkaround=
-startnotif=
-endnotif=
+fps=60
+crf=20
+preset=fast
+pixelformat=yuv420p
+encoder=libx264
+save=false
+failsave=true
+colorworkaround=false
+startnotif=true
+endnotif=true
 
-grimshot=
-blast=
+grimshot=false
 
-wlscreenrec=
-codec=
-extpixelformat=
-bitrate=
+wlscreenrec=false
+codec=auto
+extpixelformat=nv12
+bitrate="5 MB"
 
-directory=
-kooha_dir=
+directory="~/Videos"
+kooha_dir="~/Videos/Kooha"
 EOL
 	)
 
