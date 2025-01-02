@@ -20,6 +20,7 @@ create_default_config() {
 	local endnotif=${15}
 	local grimshot=${16}
 	local blast=${17}
+	local bitrate=${18}
 
 	mkdir -p "$CONFIG_DIR"
 
@@ -43,6 +44,7 @@ blast=$blast
 wlscreenrec=$wlscreenrec
 codec=$codec
 extpixelformat=$extpixelformat
+bitrate=$bitrate
 
 directory="$directory"
 kooha_dir="~/Videos/Kooha"
