@@ -76,6 +76,7 @@ startnotif=true
 endnotif=true
 
 grimshot=false
+blast=false
 
 wlscreenrec=false
 codec=auto
