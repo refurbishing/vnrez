@@ -228,7 +228,7 @@ initial_setup() {
 	fi
 
 	if [[ "$prompt_service" == true ]]; then
-		create_default_config "$service" "$auth_token"
+		create_config "$service" "$auth_token"
 		return
 	fi
 
@@ -312,7 +312,7 @@ initial_setup() {
 			echo -n "✦ ) "
 			read -r kooha_dir
 			sleep 0.1
-			kooha_dir=${kooha_dir:-"$HOME/Videos/Kooha"}
+			kooha_dir=${kooha_dir:-"~/Videos/Kooha"}
 			while [[ ! -d "$kooha_dir" || "$kooha_dir" == "/" || "$kooha_dir" != "$HOME"* ]]; do
 				echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
 				echo -n "✦ ) "
@@ -397,7 +397,10 @@ initial_setup() {
 		echo -n "✦ ) "
 		read -r bitrate
 		sleep 0.1
-		bitrate=${bitrate:-5 mb}
+		bitrate=${bitrate:-"\"5 mb"\"}
+		if [[ "$bitrate" != \"*\" ]]; then
+			bitrate="\"$bitrate\""
+		fi
 	fi
 
 	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
@@ -405,17 +408,19 @@ initial_setup() {
 		echo -n "✦ ) "
 		read -r save_recordings
 		sleep 0.1
+		directory=${directory:-"~/Videos"}
 		if [[ "$save_recordings" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 			save=true
-			echo -e "\e[33mEnter the directory to save files (default is ~/Videos):\e[0m"
+			echo -e "\e[33mEnter the directory to save recordings (default is ~/Videos/) :\e[0m"
 			echo -n "✦ ) "
 			read -r directory
+			directory=${directory:-"~/Videos"}
 			sleep 0.1
-			directory=${directory:-"$HOME/Videos"}
 			while [[ ! -d "$directory" || "$directory" == "/" || "$directory" != "$HOME"* ]]; do
 				echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
 				echo -n "✦ ) "
 				read -r directory
+				directory=${directory:-"~/Videos"}
 				sleep 0.1
 				if [[ "$directory" == "~"* ]]; then
 					directory="$HOME${directory:1}"
@@ -460,7 +465,7 @@ initial_setup() {
 		fi
 	fi
 
-	create_default_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate"
+	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate"
 	}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then

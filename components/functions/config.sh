@@ -2,7 +2,7 @@ SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 source "$SCRIPT_DIR/components/functions/variables.sh"
 
-create_default_config() {
+create_config() {
 	local service=$1
 	local auth_token=$2
 	local fps=$3
