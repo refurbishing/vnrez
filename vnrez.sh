@@ -16,7 +16,6 @@ fi
 handle_cases
 handle_args "$1" "$2" "$3"
 
-
 if [[ "$1" == "--help" || "$1" == "-h" || ( "$1" == "auto" && ( "$2" == "--help" || "$2" == "-h" )) ]]; then
 	help
 fi
@@ -504,6 +503,9 @@ if [[ "$1" == "auto" ]] || [[ ! -f "$CONFIG_FILE" && $(command -v grim) && ! $(c
 	else
 		blast=false
 	fi
+else
+	grimshot=false
+	blast=false
 fi
 
 if [[ -f "$CONFIG_FILE" ]]; then
@@ -658,17 +660,25 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 		fi
 	elif [[ "$choice" == "shot" ]]; then
 		acquire_lock
-		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
-			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-				"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+		if command -v grim >/dev/null; then
+			if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
+				if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+					"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+				else
+					"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+				fi
+			elif [[ "$grimshot" == true && "$blast" == false ]]; then
+				if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+					"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
+				else
+					"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+				fi
 			else
-				"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
-			fi
-		elif [[ "$grimshot" == true && "$blast" == false ]]; then
-			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-				"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
-			else
-				"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+				if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+					"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+				else
+					"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
+				fi
 			fi
 		else
 			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
@@ -822,19 +832,27 @@ fi
 
 if [[ "$1" == "shot" || ( "$1" == "auto" && "$2" == "shot" ) ]]; then
 	acquire_lock
-	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
-		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-			"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
-		else
-			"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+	if command -v grim >/dev/null; then
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+			fi
+		elif [[ "$grimshot" == true && "$blast" == false ]]; then
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+			fi
+		elif [[ "$grimshot" == false ]]; then
+			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
+				"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+			else
+				"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
+			fi
 		fi
-	elif [[ "$grimshot" == true && "$blast" == false ]]; then
-		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-			"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
-		else
-			"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
-		fi
-	elif [[ "$grimshot" == false ]]; then
+	else
 		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 			"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
 		else

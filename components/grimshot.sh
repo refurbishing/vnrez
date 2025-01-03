@@ -31,12 +31,31 @@ if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 	shift
 fi
 
+killHyprpicker() {
+  if [ ! $HYPRPICKER_PID -eq -1 ]; then
+    kill $HYPRPICKER_PID
+  fi
+}
+
 if [[ "$1" == "--area" || ( "$1" == "shot" && -z "$2" ) || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) ]]; then
-	area=$(slurp)
-	grim -g "$area" -t png "$temp_file"
-	if [[ -z "$area" ]]; then
-		exit 1
-	fi
+    if [[ "$2" == "--freeze" || "$3" == "--freeze" ]]; then
+        if command -v hyprpicker &> /dev/null; then
+            hyprpicker -r -z &
+        fi
+        sleep 0.2
+        HYPRPICKER_PID=$!
+    fi
+    area=$(slurp)
+    grim -g "$area" -t png "$temp_file"
+    if [[ -z "$area" ]]; then
+        if [[ "$2" == "--freeze" || "$3" == "--freeze" ]]; then
+            if command -v hyprpicker &> /dev/null; then
+                killHyprpicker
+            fi
+        fi
+        exit 1
+    fi
+
 elif [[ "$1" == "--screen" || ( "$1" == "shot" && "$2" == "--screen" ) || ( "$1" == "auto" && "$2" == "--screen" ) || ( "$1" == "auto" && "$2" == "--screen" ) ]]; then
 	grim -o "$(getactivemonitor)" -t png "$temp_file"
 fi

@@ -73,12 +73,24 @@ elif [[ "$grimshot" = true && "$blast" = false ]]; then
         "--screen"
         "--area"
     )
-else
+elif [[ "$grimshot" = false ]]; then  
     shot_args=(
         "--gui"
         "--full"
         "--screen"
     )
+else
+    if [[ "$1" == "auto" ]] || [[ ! -f "$CONFIG_FILE" ]]; then
+        shot_args=(
+            "--area"
+            "--screen"
+            "--output"
+            "--freeze"
+            "--active"
+            "--gui"
+            "--full"
+        )
+    fi
 fi
 
 record_args=(
