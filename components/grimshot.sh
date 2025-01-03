@@ -31,7 +31,7 @@ if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 	shift
 fi
 
-if [[ "$1" == "--area" || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) ]]; then
+if [[ "$1" == "--area" || ( "$1" == "shot" && -z "$2" ) || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) ]]; then
 	area=$(slurp)
 	grim -g "$area" -t png "$temp_file"
 	if [[ -z "$area" ]]; then
