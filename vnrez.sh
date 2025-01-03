@@ -233,7 +233,7 @@ initial_setup() {
 	fi
 
 	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) && "$XDG_SESSION_TYPE" != "x11" ]]; then
-		screen_recorders=()		
+		screen_recorders=()
 		if command -v wf-recorder >/dev/null; then
 			screen_recorders+=("wf-recorder")
 		fi
@@ -500,12 +500,12 @@ if [[ "$1" == "auto" ]] || [[ ! -f "$CONFIG_FILE" && $(command -v grim) && ! $(c
     grimshot=true
     if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
         blast=true
-	else
-		blast=false
-	fi
+    else
+        blast=false
+    fi
 else
-	grimshot=false
-	blast=false
+    grimshot=false
+    blast=false
 fi
 
 if [[ -f "$CONFIG_FILE" ]]; then
@@ -608,7 +608,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 
 					printf "\nEnter the file paths to upload, separated by spaces (limit is 6):\n"
 					echo -n "✦"
-					echo -n " ) " 
+					echo -n " ) "
 					file_paths=""
 					while IFS= read -r -s -n1 char; do
 						if [[ $char == "" ]]; then
@@ -690,7 +690,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 		release_lock
 		exit 0
 	fi
-	
+
 	sub_options=("${base_options[@]}" "ǀ" "↩" "⨯")
 
 	selected=0
