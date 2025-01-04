@@ -68,6 +68,9 @@ if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] && [[ "$grimshot" = true && "$blast" 
         "--active"
         "--area"
         "--freeze"
+        "--cursor"
+        "--wait"
+        "--scale"
     )
 elif [[ "$grimshot" = true && "$blast" = false ]]; then
     shot_args=(
