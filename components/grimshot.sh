@@ -60,6 +60,12 @@ elif [[ "$1" == "--screen" || ( "$1" == "shot" && "$2" == "--screen" ) || ( "$1"
 	grim -o "$(getactivemonitor)" -t png "$temp_file"
 fi
 
+if [[ "$1" == "--freeze" || "$2" == "--freeze" || "$3" == "--freeze" ]]; then 
+    if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || $(command -v hyprpicker &> /dev/null) ]]; then
+        killHyprpicker
+    fi
+fi
+
 if [[ "$service" == "none" ]]; then
 	[[ "$endnotif" == true ]] && notify-send "Image copied to clipboard" -a "VNREZ" -i $temp_file
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then

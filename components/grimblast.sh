@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# based on https://github.com/hyprwm/Hyprland/blob/main/contrib/grimshot
 
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 source "$SCRIPT_DIR/functions/variables.sh"
