@@ -837,7 +837,7 @@ fi
 
 if [[ "$1" == "shot" || ( "$1" == "auto" && "$2" == "shot" ) ]]; then
 	acquire_lock
-	if command -v grim >/dev/null; then
+	if [[ "$XDG_SESSION_TYPE" == "wayland" && ( "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" && "$XDG_CURRENT_DESKTOP" != "X-Cinnamon" ) ]]; then
 		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
 			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 				"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
