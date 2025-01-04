@@ -8,7 +8,7 @@ help() {
 		echo "  upload, -u             Upload specified video files (mp4, mkv, webm, gif)"
 		echo "  auto                   Run with default settings without using a config file"
 		echo ""
-		echo "shot:" 
+		echo "shot [--freeze]:" 
 		echo "  --output               Make a screenshot of the current output"
 		echo "  --area                 Make a selected region screenshot"
 		echo ""
