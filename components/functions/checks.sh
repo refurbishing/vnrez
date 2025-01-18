@@ -60,8 +60,8 @@ check_dependencies() {
 				missing_dependencies+=("kooha or io.github.seadve.Kooha (Flatpak)")
 			fi
 		elif [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-			if ! command -v "flameshot" &>/dev/null || ! command -v "grim" &>/dev/null || ! command -v "hyprpicker" &>/dev/null; then
-				dependencies+=("flameshot and grim (with hyprpicker)")
+			if ! command -v "flameshot" &>/dev/null && ! command -v "grim" &>/dev/null && ! command -v "hyprpicker" &>/dev/null; then
+				dependencies+=("flameshot or grim (with hyprpicker)")
 			fi
 		else
 			if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
