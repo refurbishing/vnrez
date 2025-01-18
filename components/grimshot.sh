@@ -37,7 +37,7 @@ killHyprpicker() {
   fi
 }
 
-if [[ "$1" == "--area" || "$1" == "--freeze" || ( "$1" == "shot" && -z "$2" ) || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "shot" && "$2" == "--freeze" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) ]]; then
+if [[ "$1" == "--area" || "$1" == "--freeze" || ( "$1" == "shot" || -z "$2" ) || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "shot" && "$2" == "--freeze" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) ]]; then
     if [[ "$1" == "--freeze" || "$2" == "--freeze" || "$3" == "--freeze" ]]; then 
         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || $(command -v hyprpicker &> /dev/null) ]]; then
             hyprpicker -r -z &
