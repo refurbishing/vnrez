@@ -180,7 +180,7 @@ else
 				[[ "$endnotif" == true ]] && notify-send -t 5000 "Recording is being converted to GIF" "Please Wait.." -a "VNREZ Recorder" &
 				pkill ffmpeg &
 				wait
-				sleep 1.5
+				[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
 				gif_file=$(gif "$video_file")
 				upload_video "$gif_file" "--gif"
@@ -188,8 +188,8 @@ else
 				[[ "$endnotif" == true ]] && notify-send -t 2000 "Recording Stopped" "Stopped" -a "VNREZ Recorder" &
 				pkill ffmpeg &
 				wait
-				sleep 1.5
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
+				[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
 				upload_video "$video_file"
 			fi
 		else
@@ -249,7 +249,7 @@ else
 				[[ "$endnotif" == true ]] && notify-send -t 5000 "Recording is being converted to GIF" "Please Wait.." -a "VNREZ Recorder" &
 				pkill "$recorder_command" &
 				wait
-				sleep 1.5
+				[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
 				gif_file=$(gif "$video_file")
 				upload_video "$gif_file" "--gif"
@@ -258,7 +258,7 @@ else
 					[[ "$endnotif" == true ]] && notify-send -t 2000 "Recording Stopped" "Stopped" -a "VNREZ Recorder" &
 					pkill "$recorder_command" &
 					wait
-					sleep 1.5
+					[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
 					video_file=$(ls -t recording_*.mp4 | head -n 1)
 					[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
 					upload_video "$video_file"
