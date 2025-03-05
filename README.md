@@ -108,4 +108,4 @@ Now paste that API KEY when doing the initial setup.
 
 The record script is based on [End's Dotfiles Record script](https://github.com/end-4/dots-hyprland/blob/main/.config/ags/scripts/record-script.sh) but to support alot more DEs, Configuration, allow GIF Output & so much more.
 
-The grimshot Screenshot script has some functions borrowed from [Hyprland's grimblast](https://github.com/hyprwm/Hyprland/blob/main/contrib/grimblast) to have freeze functionality.
+The grimshot Screenshot script has some functions borrowed from [Hyprland's grimblast](https://github.com/hyprwm/contrib/blob/main/grimblast/grimblast) to have freeze functionality.
