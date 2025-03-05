@@ -48,7 +48,7 @@ while [ $# -gt 0 ]; do
   -w | --wait)
     shift
     WAIT=$1
-    if echo "$WAIT" | grep "[^0-9]" -q; then
+    if [[ ! "$WAIT" =~ ^[0-9]+(\.[0-9]+)?$ ]]; then
       echo "Invalid value for wait '$WAIT'" >&2
       exit 3
     fi
