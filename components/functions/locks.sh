@@ -1,11 +1,11 @@
 acquire_lock() {
 	if [[ -f "$lockfile" ]]; then
 		other_pid=$(cat "$lockfile")
-		if kill -0 "$other_pid" 2>/dev/null; then
+		if ! kill -0 "$other_pid" 2>/dev/null; then
+			echo $$ >"$lockfile"
+		elif kill -0 "$other_pid" 2>/dev/null; then
 			echo "Another instance of vnrez is already running."
 			exit 1
-		else
-			echo $$ >"$lockfile"
 		fi
 	else
 		echo $$ >"$lockfile"
