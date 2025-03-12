@@ -463,7 +463,7 @@ initial_setup() {
 				read -r start_service
 				sleep 0.1
 				if [[ -z "$start_service" || "$start_service" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-					start_service=truet
+					start_service=true
 					"$SCRIPT_DIR/components/shortener.sh" --start &>/dev/null
 					
 					echo -e "\e[33mDo you want to enable the shortening service to start on boot? (Y/N):\e[0m"
