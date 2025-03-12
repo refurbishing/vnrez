@@ -85,21 +85,26 @@ case $1 in
         last_original_url=""
         last_shortened_url=""
         while true; do
+            current_clip=""
             if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-                current_clip=$(wl-paste 2>/dev/null)
+                current_clip=$(wl-paste 2>/dev/null || echo "")
             else
-                current_clip=$(xclip -selection clipboard -o 2>/dev/null)
+                current_clip=$(xclip -selection clipboard -o 2>/dev/null || echo "")
             fi
             
-            if [[ $current_clip =~ ^https?:// ]] && 
+            if [ -n "$current_clip" ] && [[ $current_clip =~ ^https?:// ]] && 
                [ "$current_clip" != "$last_original_url" ] && 
                [ "$current_clip" != "$last_shortened_url" ] && 
                [ "$service" != "none" ]; then
                 
                 result=$(shorten_url "$current_clip")
-                last_shortened_url=$(echo "$result" | tail -n1)
-                last_original_url="$current_clip"
-                sleep 5
+                if [ $? -eq 0 ] && [ -n "$result" ]; then
+                    last_shortened_url=$(echo "$result" | tail -n1)
+                    last_original_url="$current_clip"
+                    sleep 5
+                else
+                    sleep 2
+                fi
             fi
             sleep 1
         done

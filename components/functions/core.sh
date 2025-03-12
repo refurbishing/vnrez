@@ -388,7 +388,7 @@ shorten_url() {
         else
             echo "$shortened_url" | xclip -selection clipboard
         fi
-        [[ "$shorten_notif" == true ]] && notify-send "URL Shortened" "$shortened_url"
+        [[ "$shortener_notif" == true ]] && notify-send "URL Shortened" "$shortened_url"
         echo "Successfully shortened URL: $shortened_url"
     else
         notify-send "Failed to shorten URL" "$url"

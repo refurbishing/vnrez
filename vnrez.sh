@@ -450,12 +450,12 @@ initial_setup() {
 			if [[ -z "$setup_shortening" || "$setup_shortening" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 				echo -e "\e[33mDo you want to have shortening notifications? (Y/N):\e[0m"
 				echo -n "✦ ) "
-				read -r shorten_notif
+				read -r shortener_notif
 				sleep 0.1
-				if [[ -z "$shorten_notif" || "$shorten_notif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-					shorten_notif=true
+				if [[ -z "$shortener_notif" || "$shortener_notif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+					shortener_notif=true
 				else
-					shorten_notif=false
+					shortener_notif=false
 				fi
 				
 				echo -e "\e[33mDo you want to start the shortening service now? (Y/N):\e[0m"
@@ -481,18 +481,18 @@ initial_setup() {
 					enable_service=false
 				fi
 			else
-				shorten_notif=false
+				shortener_notif=false
 				start_service=false
 				enable_service=false
 			fi
 		else
-			shorten_notif=false
+			shortener_notif=false
 			start_service=false
 			enable_service=false
 		fi
 	fi
 
-	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shorten_notif"
+	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif"
 	}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
