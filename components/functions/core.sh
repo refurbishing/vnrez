@@ -368,7 +368,7 @@ shorten_url() {
             response=$(curl -s -w "%{http_code}" -X PUT "$nest_shortener" \
                 -H "Authorization: $auth" \
                 -H "Content-Type: application/json" \
-                -d "{\"url\":\"$url\", \"domain\":\"nest.rip\", \"subDomain\":\"\", \"embedType\":\"Target\", \"urlType\":\"Normal\", \"length\":5, \"password\":\"\"}")
+                -d "{\"url\":\"$url\", \"domain\":\"$domain\", \"subDomain\":\"$subdomain\", \"embedType\":\"Target\", \"urlType\":\"$urltype\", \"length\":$length, \"password\":\"\"}")
             http_code=${response: -3}
             response=${response%???}
             shortened_url=$(echo "$response" | jq -r '.url')

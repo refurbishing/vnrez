@@ -22,6 +22,10 @@ create_config() {
 	local blast=${17}
 	local bitrate=${18}
 	local shortener_notif=${19}
+	local domain=${20}
+	local subdomain=${21}
+	local length=${22}
+	local urltype=${23}
 
 	mkdir -p "$CONFIG_DIR"
 
@@ -43,7 +47,20 @@ grimshot=$grimshot
 blast=$blast
 
 shortener_notif=$shortener_notif
+EOL
 
+	if [[ "$service" == "nest" ]]; then
+		cat >>"$CONFIG_FILE" <<EOL
+
+domain="$domain"
+subdomain="$subdomain"
+length=$length
+urltype="$urltype"
+EOL
+	fi
+
+	cat >>"$CONFIG_FILE" <<EOL
+	
 wlscreenrec=$wlscreenrec
 codec=$codec
 extpixelformat=$extpixelformat
@@ -82,7 +99,23 @@ grimshot=false
 blast=false
 
 shortener_notif=false
+EOL
+	)
 
+	if grep -q '^service="nest"$' "$config_path"; then
+		default_config_content+=$'\n'
+		default_config_content+=$(cat <<EOL
+domain="nest.rip"
+subdomain=""
+length=5
+urltype="Normal"
+EOL
+	)
+	fi
+
+	default_config_content+=$'\n'
+	default_config_content+=$(cat <<EOL
+ 
 wlscreenrec=false
 codec=auto
 extpixelformat=nv12

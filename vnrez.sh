@@ -86,12 +86,12 @@ initial_setup() {
 		case $input in
 		$'\x1b')
 			read -rsn2 -t 0.1 input
-			if [[ $input == "[D" ]]; then
+			if [[ $input == "[A" || $input == "[D" ]]; then
 				((selected--))
 				if [[ $selected -lt 0 ]]; then
 					selected=$((${#services[@]} - 1))
 				fi
-			elif [[ $input == "[C" ]]; then
+			elif [[ $input == "[B" || $input == "[C" ]]; then 
 				((selected++))
 				if [[ $selected -ge ${#services[@]} ]]; then
 					selected=0
@@ -463,8 +463,8 @@ initial_setup() {
 				read -r start_service
 				sleep 0.1
 				if [[ -z "$start_service" || "$start_service" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-					start_service=true
-					"$SCRIPT_DIR/components/shortener.sh" --start
+					start_service=truet
+					"$SCRIPT_DIR/components/shortener.sh" --start &>/dev/null
 					
 					echo -e "\e[33mDo you want to enable the shortening service to start on boot? (Y/N):\e[0m"
 					echo -n "✦ ) "
@@ -472,7 +472,7 @@ initial_setup() {
 					sleep 0.1
 					if [[ -z "$enable_service" || "$enable_service" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
 						enable_service=true
-						"$SCRIPT_DIR/components/shortener.sh" --enable
+						"$SCRIPT_DIR/components/shortener.sh" --enable &>/dev/null
 					else
 						enable_service=false
 					fi
@@ -492,8 +492,51 @@ initial_setup() {
 		fi
 	fi
 
-	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif"
-	}
+	if [[ "$service" == "nest" ]]; then
+		sleep 0.1
+		echo -e "\e[1;90mDear nest.rip user, you'll have to do additional setup for the URL shortening service.\e[0m"
+		sleep 0.25
+		
+		echo -e "\e[33mEnter domain (default: nest.rip):\e[0m"
+		echo -n "✦ ) "
+		read -r domain
+		domain=${domain:-"nest.rip"}
+		sleep 0.1
+		
+		echo -e "\e[33mEnter subdomain (optional):\e[0m"
+		echo -n "✦ ) "
+		read -r subdomain
+		sleep 0.1
+		
+		echo -e "\e[33mEnter URL length (5-10, default: 5):\e[0m"
+		echo -n "✦ ) "
+		read -r length
+		length=${length:-"5"}
+		sleep 0.1
+		while ! [[ "$length" =~ ^[5-9]$|^10$ ]]; do
+			echo -e "\e[31mInvalid length. Please enter a number between 5-10:\e[0m"
+			echo -n "✦ ) "
+			read -r length
+			length=${length:-"5"}
+			sleep 0.1
+		done
+		
+		echo -e "\e[33mEnter URL type (Normal/Invisible/Emoji, default: Normal):\e[0m"
+		echo -n "✦ ) "
+		read -r urltype
+		urltype=${urltype:-"Normal"}
+		sleep 0.1
+		while ! [[ "$urltype" =~ ^(Normal|Invisible|Emoji)$ ]]; do
+			echo -e "\e[31mInvalid type. Enter Normal, Invisible, or Emoji:\e[0m"
+			echo -n "✦ ) "
+			read -r urltype
+			urltype=${urltype:-"Normal"}
+			sleep 0.1
+		done
+	fi
+
+	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif" "$domain" "$subdomain" "$length" "$urltype"
+}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
 	if [[ ! -f "$CONFIG_FILE" ]]; then
