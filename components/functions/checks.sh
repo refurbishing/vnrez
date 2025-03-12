@@ -2,6 +2,13 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
+check_systemd() {
+    if [ ! -d "/run/systemd/system" ]; then
+        echo "Error: systemd is not the active init system or not installed."
+        exit 1
+    fi
+}
+
 check_root() {
 	if [[ $EUID -eq 0 ]]; then
 		echo -e "\e[31mThis script should not be run as root.\e[0m"

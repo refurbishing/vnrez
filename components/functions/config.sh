@@ -21,6 +21,7 @@ create_config() {
 	local grimshot=${16}
 	local blast=${17}
 	local bitrate=${18}
+	local shorten_notif=${19}
 
 	mkdir -p "$CONFIG_DIR"
 
@@ -40,6 +41,8 @@ endnotif=$endnotif
 
 grimshot=$grimshot
 blast=$blast
+
+shorten_notif=$shorten_notif
 
 wlscreenrec=$wlscreenrec
 codec=$codec
@@ -77,6 +80,8 @@ endnotif=true
 
 grimshot=false
 blast=false
+
+shorten_notif=false
 
 wlscreenrec=false
 codec=auto

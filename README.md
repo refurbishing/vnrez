@@ -1,6 +1,6 @@
 # VNREZ Tool [<img src="./assets/logo.png" width="225" align="left" alt="VNREZ Logo">](https://github.com/verysillycat/vnrez)
 
-#### Make Recordings & Screenshots and upload them to your favorite file hosts on Linux, with support for region, GIF, and audio at ease.
+#### Make Recordings, Screenshots, and upload them to your favorite file hosts on Linux, with support for region, GIF, audio, and URL Shortening at ease.
 
 [![Total Commits](https://img.shields.io/github/commit-activity/t/verysillycat/vnrez?style=flat&logo=github&label=Commits&labelColor=%230f0f0f&color=%23191919)](https://github.com/verysillycat/vnrez/commits/)
 <br>
@@ -81,6 +81,15 @@ Now paste that API KEY when doing the initial setup.
 - `--fullscreen-sound` fullscreen with sound
 - `--gif` snip with gif output
 
+### URL Shortener
+<small><strong>case: shorten</strong></small>
+- `--start` start the shortening service
+- `--stop` stop the shortening service
+- `--enable` enable the shortening service to start on boot
+- `--disable` disable the shortening service from starting on boot
+- `--logs` show the logs of the shortening service
+> [!] SYSTEM-D is required to use this feature.
+
 ##### ★ When using Kooha, you'll not see some of these arguments as they aren't needed.
 
 ## Configuration
@@ -102,6 +111,7 @@ Now paste that API KEY when doing the initial setup.
 - `directory` set directory to save videos in there will be ignored if using kooha
 - `kooha_dir` set the kooha directory also save videos in here if using kooha
 - `grimshot` set to true if want to use grimblast (hyprland only)
+- `shorten_notif` show the shortening notification or not
 ##### ☆ When using Kooha, some of these arguments are unnecessary as they are not supported or required.
 
 ## Credits

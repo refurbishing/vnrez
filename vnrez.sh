@@ -442,30 +442,57 @@ initial_setup() {
 	fi
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" || "$XDG_SESSION_TYPE" == "x11" ]]; then
-		echo -e "\e[33mDo you want to have start notifications? (Y/N):\e[0m"
-		echo -n "✦ ) "
-		read -r startnotif
-		sleep 0.1
-		if [[ -z "$startnotif" || "$startnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-			startnotif=true
+		if [ -d "/run/systemd/system" ]; then
+			echo -e "\e[33mDo you want to set up shortening now? (Y/N):\e[0m"
+			echo -n "✦ ) "
+			read -r setup_shortening
+			sleep 0.1
+			if [[ -z "$setup_shortening" || "$setup_shortening" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+				echo -e "\e[33mDo you want to have shortening notifications? (Y/N):\e[0m"
+				echo -n "✦ ) "
+				read -r shorten_notif
+				sleep 0.1
+				if [[ -z "$shorten_notif" || "$shorten_notif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+					shorten_notif=true
+				else
+					shorten_notif=false
+				fi
+				
+				echo -e "\e[33mDo you want to start the shortening service now? (Y/N):\e[0m"
+				echo -n "✦ ) "
+				read -r start_service
+				sleep 0.1
+				if [[ -z "$start_service" || "$start_service" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+					start_service=true
+					"$SCRIPT_DIR/components/shortener.sh" --start
+					
+					echo -e "\e[33mDo you want to enable the shortening service to start on boot? (Y/N):\e[0m"
+					echo -n "✦ ) "
+					read -r enable_service
+					sleep 0.1
+					if [[ -z "$enable_service" || "$enable_service" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+						enable_service=true
+						"$SCRIPT_DIR/components/shortener.sh" --enable
+					else
+						enable_service=false
+					fi
+				else
+					start_service=false
+					enable_service=false
+				fi
+			else
+				shorten_notif=false
+				start_service=false
+				enable_service=false
+			fi
 		else
-			startnotif=false
+			shorten_notif=false
+			start_service=false
+			enable_service=false
 		fi
 	fi
 
-	if [[ "$XDG_SESSION_TYPE" == "wayland" || "$XDG_SESSION_TYPE" == "x11" ]]; then
-		echo -e "\e[33mDo you want to have end notifications? (Y/N):\e[0m"
-		echo -n "✦ ) "
-		read -r endnotif
-		sleep 0.1
-		if [[ -z "$endnotif" || "$endnotif" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-			endnotif=true
-		else
-			endnotif=false
-		fi
-	fi
-
-	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate"
+	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shorten_notif"
 	}
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
@@ -519,7 +546,11 @@ if [[ -f "$CONFIG_FILE" ]]; then
 fi
 
 if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
-	options=("record" "shot" "upload" "ǀ" "⨯")
+	if [[ "$service" == "none" ]]; then
+		options=("record" "shot" "upload" "ǀ" "⨯")
+	else
+		options=("record" "shot" "upload" "shortener" "ǀ" "⨯")
+	fi
 	selected=0
 	tput clear
 
@@ -694,6 +725,8 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 		fi
 		release_lock
 		exit 0
+	elif [[ "$choice" == "shortener" ]]; then
+		base_options=("start" "target" "stop" "enable" "disable" "logs")
 	fi
 
 	sub_options=("${base_options[@]}" "ǀ" "↩" "⨯")
@@ -815,6 +848,23 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 				"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
 			fi
 		fi
+	elif [[ "$choice" == "shortener" ]]; then
+		if [[ "$sub_choice" == "target" ]]; then
+			echo -e "\e[33mEnter the URL to shorten:\e[0m"
+			echo -n "✦ ) "
+			read -r url_to_shorten
+			if [[ -n "$url_to_shorten" ]]; then
+				"$SCRIPT_DIR/components/shortener.sh" "$url_to_shorten"
+				sleep 2
+			else
+				echo -e "\e[31mNo URL provided. Operation cancelled.\e[0m"
+				sleep 1.5
+			fi
+		else
+			"$SCRIPT_DIR/components/shortener.sh" "--$sub_choice"
+		fi
+		sleep 0.2
+		exec "$0" "$@"
 	else
 		if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 			"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
@@ -824,6 +874,15 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 	fi
 	sleep 0.2
 	exec "$0" "$@"
+fi
+
+if [[ "$1" == "shorten" || ( "$1" == "auto" && "$2" == "shorten" ) ]]; then
+	if [[ "$1" == "auto" ]]; then
+		"$SCRIPT_DIR/components/shortener.sh" "${@:3}"
+	else
+		"$SCRIPT_DIR/components/shortener.sh" "${@:2}"
+	fi
+	exit 0
 fi
 
 if [[ "$1" == "upload" || "$1" == "-u" || ( "$1" == "auto" && ( "$2" == "upload" || "$2" == "-u" )) ]]; then
@@ -871,7 +930,11 @@ fi
 if [[ "$1" == "record" || ( "$1" == "auto" && "$2" == "record" ) ]]; then
 	acquire_lock
 	if [[ ( "$1" == "auto" && "$2" == "--abort" ) || "$2" == "--abort" ]]; then
-		"$SCRIPT_DIR/components/record.sh" "${@:2}"
+		if [[ "$1" == "auto" ]]; then
+			"$SCRIPT_DIR/components/record.sh" "${@:3}"
+		else
+			"$SCRIPT_DIR/components/record.sh" "${@:2}"
+		fi
 	elif [[ ( "$1" == "auto" && "$2" == "record" ) || "$2" == "record" && ! -f "$CONFIG_FILE" ]]; then
 		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
 			"$SCRIPT_DIR/components/record.sh" auto

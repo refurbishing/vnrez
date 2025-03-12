@@ -19,7 +19,7 @@ help() {
 		echo "  --no-sound, (none)     Record a selected region without sound"
 		echo "  --gif                  Record a selected region and convert to GIF"
 		echo "  --abort                Abort the current recording"
-		echo ""
+		show_shorten_help
 		exit 0
 	fi
 
@@ -46,7 +46,7 @@ help() {
 		echo "  --no-sound, (none)     Record a selected region without sound"
 		echo "  --gif                  Record a selected region and convert to GIF"
 		echo "  --abort                Abort the current recording"
-		echo ""
+		show_shorten_help
 		exit 0
 	fi
 
@@ -71,6 +71,7 @@ help() {
 		echo "  --abort                Abort the current recording"
 		echo ""
 		echo "Note: This record help message is specific to Wayland sessions on GNOME and KDE."
+		show_shorten_help
 		exit 0
 	fi
 
@@ -96,7 +97,7 @@ help() {
 		echo "  --no-sound, (none)     Record a selected region without sound"
 		echo "  --gif                  Record a selected region and convert to GIF"
 		echo "  --abort                Abort the current recording"
-		echo ""
+		show_shorten_help
 		exit 0
 	fi
 }
@@ -167,4 +168,17 @@ handle_resize() {
 	tput clear
 	prev_rows=$(tput lines)
 	prev_cols=$(tput cols)
+}
+
+show_shorten_help() {
+	if [ -d "/run/systemd/system" || $service != "none" ]; then
+		echo ""
+		echo "shorten:"
+		echo "  --start                Start the shortening service"
+		echo "  --stop                 Stop the shortening service"
+		echo "  --enable               Enable the shortening service to start on boot"
+		echo "  --disable              Disable the shortening service from starting on boot"
+		echo "  --logs                 Show the logs of the shortening service"
+	fi
+	echo ""
 }

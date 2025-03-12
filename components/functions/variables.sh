@@ -8,6 +8,12 @@ fi
 ez="https://api.e-z.host/files"
 nest="https://nest.rip/api/files/upload"
 
+ez_shortener="https://api.e-z.gg/shortener"
+nest_shortener="https://nest.rip/api/shorts"
+
+SERVICE_NAME="vnrez-shortener"
+SERVICE_FILE="$HOME/.config/systemd/user/$SERVICE_NAME.service"
+
 temp_file="/tmp/screenshot.png"
 response="/tmp/upload.json"
 response_video="/tmp/upload_video.json"
@@ -59,6 +65,7 @@ valid_cases=(
     "-u"
     "shot"
     "record"
+    "shorten"
 )
 
 if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] && [[ "$grimshot" = true && "$blast" = true ]]; then
@@ -105,4 +112,13 @@ record_args=(
     "--no-sound"
     "--gif"
 	"--abort"
+)
+
+shorten_args=(
+    "--daemon"
+    "--start"
+    "--stop"
+    "--enable"
+    "--disable"
+    "--logs"
 )

@@ -1,5 +1,6 @@
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 source "$SCRIPT_DIR/functions/variables.sh"
+source "$SCRIPT_DIR/functions/misc.sh"
 
 upload_video() {
 	local file=$1
@@ -325,6 +326,74 @@ upload_shot() {
 		fi
 		notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
 	fi
+}
+
+shorten_url() {
+    local url=$1
+    
+    if [ "$service" = "none" ]; then
+        notify-send "VNREZ URL Shortener" "No Service selected"
+        echo "No Service selected. Set a service in your config file."
+        exit 1
+    fi
+    
+    echo -n " "
+    spinner_pid=""
+    if [[ "$1" != "--daemon" ]]; then
+        (
+        spinner='-\|/'
+        i=0
+        while :; do
+            i=$(( (i+1) % 4 ))
+            printf "\b%s" "${spinner:$i:1}"
+            sleep 0.1
+        done
+        ) &
+        sleep 0.25
+        spinner_pid=$!
+        trap 'kill $spinner_pid 2>/dev/null' EXIT
+    fi
+    
+    case $service in
+        "e-z")
+            response=$(curl -s -w "%{http_code}" -X POST "$ez_shortener" \
+                -H "key: $auth" \
+                -H "Content-Type: application/json" \
+                -d "{\"url\":\"$url\"}")
+            http_code=${response: -3}
+            response=${response%???}
+            shortened_url=$(echo "$response" | jq -r '.shortendUrl')
+            ;;
+        "nest")
+            response=$(curl -s -w "%{http_code}" -X PUT "$nest_shortener" \
+                -H "Authorization: $auth" \
+                -H "Content-Type: application/json" \
+                -d "{\"url\":\"$url\", \"domain\":\"nest.rip\", \"subDomain\":\"\", \"embedType\":\"Target\", \"urlType\":\"Normal\", \"length\":5, \"password\":\"\"}")
+            http_code=${response: -3}
+            response=${response%???}
+            shortened_url=$(echo "$response" | jq -r '.url')
+            ;;
+        *) echo "Invalid service"; kill $spinner_pid 2>/dev/null; exit 1 ;;
+    esac
+
+    kill $spinner_pid 2>/dev/null
+    printf "\b \b"
+    echo -n -e "\r\033[K"
+    
+    if [ "$http_code" = "400" ]; then
+        notify-send "Rate Limited" "You are being rate limited. Please try again later."
+    elif [ -n "$shortened_url" ] && [ "$shortened_url" != "null" ]; then
+        if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+            echo "$shortened_url" | wl-copy
+        else
+            echo "$shortened_url" | xclip -selection clipboard
+        fi
+        [[ "$shorten_notif" == true ]] && notify-send "URL Shortened" "$shortened_url"
+        echo "Successfully shortened URL: $shortened_url"
+    else
+        notify-send "Failed to shorten URL" "$url"
+        printf "\033[1;5;31mERROR:\033[0m Failed to shorten URL: $url\n"
+    fi
 }
 
 post_process_video() {
