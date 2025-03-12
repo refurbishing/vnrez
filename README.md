@@ -1,6 +1,6 @@
 # VNREZ Tool [<img src="./assets/logo.png" width="225" align="left" alt="VNREZ Logo">](https://github.com/verysillycat/vnrez)
 
-#### Make Recordings, Screenshots, and upload them to your favorite file hosts on Linux, with support for region, GIF, audio, and URL Shortening at ease.
+#### Make Recordings & Screenshots and upload them to your favorite file hosts on Linux, with support for region, GIF, audio, and URL Shortening at ease.
 
 [![Total Commits](https://img.shields.io/github/commit-activity/t/verysillycat/vnrez?style=flat&logo=github&label=Commits&labelColor=%230f0f0f&color=%23191919)](https://github.com/verysillycat/vnrez/commits/)
 <br>
