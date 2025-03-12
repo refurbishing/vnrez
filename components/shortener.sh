@@ -92,10 +92,12 @@ case $1 in
                 current_clip=$(xclip -selection clipboard -o 2>/dev/null || echo "")
             fi
             
-            if [ -n "$current_clip" ] && [[ $current_clip =~ ^https?:// ]] && 
+            if [ -n "$current_clip" ] && 
+               [[ $current_clip =~ ^https?://((([a-zA-Z0-9][-a-zA-Z0-9]*)|([a-zA-Z0-9][-a-zA-Z0-9]*\.)+[a-zA-Z0-9][-a-zA-Z0-9]*)|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]+)?(/[^[:space:]]*)?$ ]] && 
                [ "$current_clip" != "$last_original_url" ] && 
                [ "$current_clip" != "$last_shortened_url" ] && 
-               [ "$service" != "none" ]; then
+               [ "$service" != "none" ] &&
+               ! [[ $current_clip =~ [[:space:]] ]]; then
                 
                 result=$(shorten_url "$current_clip")
                 if [ $? -eq 0 ] && [ -n "$result" ]; then
@@ -105,8 +107,9 @@ case $1 in
                 else
                     sleep 2
                 fi
+            else
+                sleep 1
             fi
-            sleep 1
         done
         ;;
     *)
