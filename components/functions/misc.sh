@@ -171,7 +171,7 @@ handle_resize() {
 }
 
 show_shorten_help() {
-	if [ -d "/run/systemd/system" || $service != "none" ]; then
+	if [ -d "/run/systemd/system" ] || [ "$service" != "none" ]; then
 		echo ""
 		echo "shorten:"
 		echo "  --start                Start the shortening service"
