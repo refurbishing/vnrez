@@ -103,12 +103,14 @@ Now paste that API KEY when doing the initial setup.
 - `codec` set the codec, default is `hevc` (only for `wl-screenrec`)
 - `extpixelformat` set the pixel format, default is `nv12` (only for `wl-screenrec`)
 - `crf` set crf number
-- `save` will save your Recorded Videos on `~/Videos`
 - `failsave` if your Video Recording upload fails, it will be saved on `~/Videos/e-zfailed`
 - `colorworkaround` re-encode videos on upload for color correction, might take longer to upload
 - `startnotif` show the start notification or not
 - `endnotif` show the end notification or not
-- `directory` set directory to save videos in there will be ignored if using kooha
+- `photosave` if true it will save screenshots in `photodir` will be ignored if using kooha
+- `videosave` if true it will save videos in `videodir` will be ignored if using kooha
+- `photodir` set the directory to save screenshots in there will be ignored if using kooha
+- `videodir` set the directory to save videos in there will be ignored if using kooha
 - `kooha_dir` set the kooha directory also save videos in here if using kooha
 - `grimshot` set to true if want to use grimblast (hyprland only)
 - `shortener_notif` show the shortening notification or not
@@ -119,3 +121,6 @@ Now paste that API KEY when doing the initial setup.
 The record script is based on [End's Dotfiles Record script](https://github.com/end-4/dots-hyprland/blob/main/.config/ags/scripts/record-script.sh) but to support alot more DEs, Configuration, allow GIF Output & so much more.
 
 The grimshot Screenshot script has some functions borrowed from [Hyprland's grimblast](https://github.com/hyprwm/contrib/blob/main/grimblast/grimblast) to have freeze functionality.
+
+> [!NOTE]
+> If you wish to me to add your file host to support, you can open an issue on the GitHub repository but it will have semi-strict requirements and i'll not be adding every single file host out there (maybe unless if you do a PR).

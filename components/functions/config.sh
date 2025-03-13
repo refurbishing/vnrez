@@ -121,7 +121,7 @@ EOL
 
 	default_config_content+=$'\n'
 	default_config_content+=$(cat <<EOL
- 
+
 wlscreenrec=false
 codec=auto
 extpixelformat=nv12
@@ -146,7 +146,6 @@ EOL
 		sed -i 's/^directory=/videodir=/' "$config_path"
 		updated=true
 	fi
-	
 
 	declare -A existing_config
 	while IFS='=' read -r key value; do
