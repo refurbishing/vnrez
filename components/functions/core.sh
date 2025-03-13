@@ -125,7 +125,7 @@ upload_video() {
 		fi
 	else
 		notify-send "Error: File URL is null. HTTP Code: $http_code" -a "VNREZ Recorder"
-	}
+	fi
 	if [[ "$upload_mode" != true ]]; then
 		[[ -f $response_video ]] && rm $response_video
 	fi
