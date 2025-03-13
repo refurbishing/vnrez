@@ -51,16 +51,17 @@ EOL
 
 	if [[ "$service" == "nest" ]]; then
 		cat >>"$CONFIG_FILE" <<EOL
-
 domain="$domain"
 subdomain="$subdomain"
 length=$length
 urltype="$urltype"
 EOL
+	else
+		echo "" >> "$CONFIG_FILE"
 	fi
 
 	cat >>"$CONFIG_FILE" <<EOL
-	
+
 wlscreenrec=$wlscreenrec
 codec=$codec
 extpixelformat=$extpixelformat
