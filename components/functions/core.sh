@@ -41,7 +41,12 @@ upload_video() {
 			notify-send "Error occurred on upload." "Status Code: $http_code Please try again later." -a "VNREZ Recorder"
 		fi
 		rm $response_video
-		[[ "$failsave" == true && "$1" != "--abort" && "$upload_mode" != true ]] && mkdir -p ~/Videos/failed && mv "$file" ~/Videos/failed/
+		
+		if [[ "$failsave" == true && "$1" != "--abort" && "$upload_mode" != true ]]; then
+			mkdir -p "$(eval echo $videodir)/failed" 2>/dev/null
+			cp "$file" "$(eval echo $videodir)/failed/"
+		fi
+		
 		[[ "$is_gif" == "--gif" ]] && rm "$gif_pending_file"
 		[[ -f "$upload_pid_file" ]] && rm -f "$upload_pid_file"
 		exit 1
@@ -65,7 +70,12 @@ upload_video() {
 				notify-send "Error occurred on upload." "Status Code: $http_code Please try again later." -a "VNREZ Recorder"
 			fi
 		fi
-		[[ "$failsave" == true && "$1" != "--abort" && "$upload_mode" != true ]] && mkdir -p ~/Videos/failed && mv "$file" ~/Videos/failed/
+		
+		if [[ "$failsave" == true && "$1" != "--abort" && "$upload_mode" != true ]]; then
+			mkdir -p "$(eval echo $videodir)/failed" 2>/dev/null
+			cp "$file" "$(eval echo $videodir)/failed/"
+		fi
+		
 		[[ "$is_gif" == "--gif" ]] && rm "$gif_pending_file"
 		rm $response_video
 		if [[ -f "$upload_pid_file" ]]; then
@@ -81,7 +91,7 @@ upload_video() {
 	fi
 
 	if [[ "$file_url" != "null" ]]; then
-		if [[ "$save" == true && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
+		if [[ "$videosave" == true && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 			echo $(date +%s) >"$(eval echo $kooha_last_time)"
 		fi
 		if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
@@ -89,6 +99,13 @@ upload_video() {
 		else
 			echo "$file_url" | wl-copy
 		fi
+			if [[ "$videosave" == true && "$upload_mode" != true ]]; then
+			mkdir -p "$(eval echo $videodir)" 2>/dev/null
+			filename=$(basename "$file")
+			cp "$file" "$(eval echo $videodir)/$filename"
+			notify-send "Recording saved" "$(eval echo $videodir)/" -a "VNREZ Recorder"
+		fi
+		
 		if [[ "$is_gif" == "--gif" || "$file" == *.gif ]]; then
 			if [[ "$XDG_SESSION_TYPE" != "wayland" || ("$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE") ]]; then
 				[[ "$endnotif" == true ]] && notify-send "GIF URL copied to clipboard" -a "VNREZ Recorder" -i link
@@ -103,12 +120,12 @@ upload_video() {
 				fi
 			fi
 		fi
-		if [[ "$save" == false && "$upload_mode" != true ]]; then
+			if [[ "$videosave" != true && "$upload_mode" != true ]]; then
 			rm "$file"
 		fi
 	else
 		notify-send "Error: File URL is null. HTTP Code: $http_code" -a "VNREZ Recorder"
-	fi
+	}
 	if [[ "$upload_mode" != true ]]; then
 		[[ -f $response_video ]] && rm $response_video
 	fi
@@ -205,7 +222,7 @@ abort_upload() {
 		if kill -0 "$upload_pid" 2>/dev/null; then
 			pkill -P "$upload_pid"
 			kill "$upload_pid"
-			if [[ "$save" == false ]]; then
+			if [[ "$videosave" != true ]]; then
 				if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 					new_files=$(find "$(eval echo $kooha_dir)" -type f -newer "$(eval echo $kooha_last_time)" | sort -n)
 					file_count=$(echo "$new_files" | wc -l)
@@ -274,6 +291,12 @@ upload_shot() {
 		else
 			notify-send "Error: Code: $http_code" "Upload failed. Please check the service status." -a "Flameshot"
 		fi
+		
+		if [[ "$failsave" == true ]]; then
+			mkdir -p "$(eval echo $photodir)/failed" 2>/dev/null
+			cp "$temp_file" "$(eval echo $photodir)/failed/screenshot_$(date +%Y%m%d_%H%M%S).png"
+		fi
+		
 		rm $temp_file
 		exit 1
 	fi
@@ -284,20 +307,38 @@ upload_shot() {
 			error=$(cat /tmp/upload.json | jq -r ".error")
 			if [[ "$error" == "null" ]]; then
 				notify-send "Error occurred while uploading. Try again later." -a "Flameshot"
+				
+				if [[ "$failsave" == true ]]; then
+					mkdir -p "$(eval echo $photodir)/failed" 2>/dev/null
+					cp "$temp_file" "$(eval echo $photodir)/failed/screenshot_$(date +%Y%m%d_%H%M%S).png"
+				fi
+				
 				rm $temp_file
 				exit 1
 			else
 				notify-send "Error: $error" -a "Flameshot"
+				
+				if [[ "$failsave" == true ]]; then
+					mkdir -p "$(eval echo $photodir)/failed" 2>/dev/null
+					cp "$temp_file" "$(eval echo $photodir)/failed/screenshot_$(date +%Y%m%d_%H%M%S).png"
+				fi
+				
 				rm $temp_file
 				exit 1
 			fi
 		fi
 	fi
 
-		if ! jq -e . >/dev/null 2>&1 <$response; then
-			notify-send "Error occurred while uploading. Invalid response." -a "Flameshot"
-			rm $temp_file
-			exit 1
+	if ! jq -e . >/dev/null 2>&1 <$response; then
+		notify-send "Error occurred while uploading. Invalid response." -a "Flameshot"
+		
+		if [[ "$failsave" == true ]]; then
+			mkdir -p "$(eval echo $photodir)/failed" 2>/dev/null
+			cp "$temp_file" "$(eval echo $photodir)/failed/screenshot_$(date +%Y%m%d_%H%M%S).png"
+		fi
+		
+		rm $temp_file
+		exit 1
 	fi
 
 	http_code="${upload_image: -3}"
@@ -311,6 +352,12 @@ upload_shot() {
 		else
 			notify-send "$error_message" -a "Flameshot"
 		fi
+		
+		if [[ "$failsave" == true ]]; then
+			mkdir -p "$(eval echo $photodir)/failed" 2>/dev/null
+			cp "$temp_file" "$(eval echo $photodir)/failed/screenshot_$(date +%Y%m%d_%H%M%S).png"
+		fi
+		
 		rm $temp_file
 		exit 1
 	else
@@ -324,7 +371,20 @@ upload_shot() {
 		else
 			echo $image_url | xclip -sel c
 		fi
+		
+		# Save screenshot if photosave is enabled
+		if [[ "$photosave" == true ]]; then
+			mkdir -p "$(eval echo $photodir)" 2>/dev/null
+			cp "$temp_file" "$(eval echo $photodir)/screenshot_$(date +%Y%m%d_%H%M%S).png"
+			notify-send "Screenshot saved" "$(eval echo $photodir)/" -a "Flameshot" -i $temp_file
+		fi
+		
 		notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
+		
+		# Remove temp file if not saving
+		if [[ "$photosave" != true ]]; then
+			rm $temp_file
+		fi
 	fi
 }
 

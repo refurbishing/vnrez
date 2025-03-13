@@ -12,9 +12,9 @@ create_config() {
 	local extpixelformat=$7
 	local wlscreenrec=$8
 	local codec=${9}
-	local directory=${10}
+	local videodir=${10}
 	local failsave=${11}
-	local save=${12}
+	local videosave=${12}
 	local encoder=${13}
 	local startnotif=${14}
 	local endnotif=${15}
@@ -26,6 +26,8 @@ create_config() {
 	local subdomain=${21}
 	local length=${22}
 	local urltype=${23}
+	local photosave=${24}
+	local photodir=${25}
 
 	mkdir -p "$CONFIG_DIR"
 
@@ -37,7 +39,8 @@ crf=$crf
 preset=$preset
 pixelformat=$pixelformat
 encoder=$encoder
-save=$save
+videosave=$videosave
+photosave=$photosave
 failsave=$failsave
 colorworkaround=false
 startnotif=$startnotif
@@ -67,7 +70,8 @@ codec=$codec
 extpixelformat=$extpixelformat
 bitrate=$bitrate
 
-directory="$directory"
+videodir="$videodir"
+photodir="$photodir"
 kooha_dir="~/Videos/Kooha"
 EOL
 
@@ -90,7 +94,8 @@ crf=20
 preset=fast
 pixelformat=yuv420p
 encoder=libx264
-save=false
+videosave=false
+photosave=false
 failsave=true
 colorworkaround=false
 startnotif=true
@@ -122,10 +127,26 @@ codec=auto
 extpixelformat=nv12
 bitrate="5 MB"
 
-directory="~/Videos"
+videodir="~/Videos"
+photodir="~/Pictures"
 kooha_dir="~/Videos/Kooha"
 EOL
 	)
+
+	## TODO: Remove this.
+	# Handle migration from save to videosave
+	if grep -q '^save=' "$config_path" && ! grep -q '^videosave=' "$config_path"; then
+		save_value=$(grep '^save=' "$config_path" | cut -d '=' -f 2)
+		sed -i 's/^save=/videosave=/' "$config_path"
+		updated=true
+	fi
+
+	if grep -q '^directory=' "$config_path" && ! grep -q '^videodir=' "$config_path"; then
+		dir_value=$(grep '^directory=' "$config_path" | cut -d '=' -f 2)
+		sed -i 's/^directory=/videodir=/' "$config_path"
+		updated=true
+	fi
+	
 
 	declare -A existing_config
 	while IFS='=' read -r key value; do

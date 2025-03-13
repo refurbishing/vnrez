@@ -307,7 +307,7 @@ initial_setup() {
 		read -r save_recordings
 		sleep 0.1
 		if [[ "$save_recordings" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-			save=true
+			videosave=true
 			echo -e "\e[33mEnter the directory to save files (You need to set it on Kooha too) (default is ~/Videos/Kooha) :\e[0m"
 			echo -n "✦ ) "
 			read -r kooha_dir
@@ -408,22 +408,22 @@ initial_setup() {
 		echo -n "✦ ) "
 		read -r save_recordings
 		sleep 0.1
-		directory=${directory:-"~/Videos"}
+		videodir=${videodir:-"~/Videos"}
 		if [[ "$save_recordings" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-			save=true
+			videosave=true
 			echo -e "\e[33mEnter the directory to save recordings (default is ~/Videos/) :\e[0m"
 			echo -n "✦ ) "
-			read -r directory
-			directory=${directory:-"~/Videos"}
+			read -r videodir
+			videodir=${videodir:-"~/Videos"}
 			sleep 0.1
-			while [[ ! -d "$directory" || "$directory" == "/" || "$directory" != "$HOME"* ]]; do
+			while [[ ! -d "$videodir" || "$videodir" == "/" || "$videodir" != "$HOME"* ]]; do
 				echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
 				echo -n "✦ ) "
-				read -r directory
-				directory=${directory:-"~/Videos"}
+				read -r videodir
+				videodir=${videodir:-"~/Videos"}
 				sleep 0.1
-				if [[ "$directory" == "~"* ]]; then
-					directory="$HOME${directory:1}"
+				if [[ "$videodir" == "~"* ]]; then
+					videodir="$HOME${videodir:1}"
 				fi
 			done
 		fi
@@ -535,7 +535,31 @@ initial_setup() {
 		done
 	fi
 
-	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$directory" "$failsave" "$save" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif" "$domain" "$subdomain" "$length" "$urltype"
+	echo -e "\e[33mDo you want to save screenshots? (Y/N):\e[0m"
+	echo -n "✦ ) "
+	read -r save_screenshots
+	sleep 0.1
+	photodir=${photodir:-"~/Pictures"}
+	if [[ "$save_screenshots" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+		photosave=true
+		echo -e "\e[33mEnter the directory to save screenshots (default is ~/Pictures/) :\e[0m"
+		echo -n "✦ ) "
+		read -r photodir
+		photodir=${photodir:-"~/Pictures"}
+		sleep 0.1
+		while [[ ! -d "$photodir" || "$photodir" == "/" || "$photodir" != "$HOME"* ]]; do
+			echo -e "\e[31mInvalid directory! Please enter a valid directory path:\e[0m"
+			echo -n "✦ ) "
+			read -r photodir
+			photodir=${photodir:-"~/Pictures"}
+			sleep 0.1
+			if [[ "$photodir" == "~"* ]]; then
+				photodir="$HOME${photodir:1}"
+			fi
+		done
+	fi
+
+	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$videodir" "$failsave" "$videosave" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif" "$domain" "$subdomain" "$length" "$urltype" "$photosave" "$photodir"
 }
 
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
@@ -682,7 +706,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 					if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 						default_save_dir="$(eval echo $kooha_dir)"
 					else
-						default_save_dir="$(eval echo $directory)"
+						default_save_dir="$(eval echo $videodir)"
 					fi
 
 					printf "\nEnter the file paths to upload, separated by spaces (limit is 6):\n"
@@ -707,7 +731,7 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 					IFS=' ' read -r -a paths_array <<<"$file_paths"
 
 					for i in "${!paths_array[@]}"; do
-						if [[ ! -f "${paths_array[$i]}" && "$save" == true ]]; then
+						if [[ ! -f "${paths_array[$i]}" && "$videosave" == true ]]; then
 							if [[ -f "$default_save_dir/${paths_array[$i]}" ]]; then
 								paths_array[$i]="$default_save_dir/${paths_array[$i]}"
 							fi
