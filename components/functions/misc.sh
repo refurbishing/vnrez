@@ -9,7 +9,7 @@ help() {
 		echo "  auto                   Run with default settings without using a config file"
 		echo ""
 		echo "shot [--freeze]:" 
-		echo "  --output               Make a screenshot of the current output"
+		echo "  --screen               Make a screenshot of the current screen"
 		echo "  --area                 Make a selected region screenshot"
 		echo ""
 		echo "record:"
