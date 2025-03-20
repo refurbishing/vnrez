@@ -32,6 +32,8 @@ upload_video() {
 		http_code=$(curl -X POST -F "file=@${file}" -H "key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	elif [[ "$service" == "nest" ]]; then
 		http_code=$(curl -X POST -F "file=@${file}" -H "Authorization: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
+	elif [[ "$service" == "emogirls" ]]; then
+		http_code=$(curl -X POST -F "file=@${file}" -H "X-API-Key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	fi
 
 	if ! jq -e . >/dev/null 2>&1 <$response_video; then
@@ -54,6 +56,12 @@ upload_video() {
 
 	if [[ "$service" == "e-z" ]]; then
 		success=$(jq -r ".success" <$response_video)
+	elif [[ "$service" == "emogirls" ]]; then
+		if [[ "$http_code" -eq 200 && "$success" == "null" ]]; then
+			success="true"
+		elif [[ "$http_code" -eq 400 && "$success" == "null" ]]; then
+			success="false"
+		fi
 	elif [[ "$service" == "nest" ]]; then
 		success=$(jq -r ".success" <$response_video)
 		if [[ "$http_code" -eq 200 && "$success" == "null" ]]; then
@@ -88,6 +96,8 @@ upload_video() {
 		file_url=$(jq -r ".imageUrl" <$response_video)
 	elif [[ "$service" == "nest" ]]; then
 		file_url=$(jq -r ".fileURL" <$response_video)
+	elif [[ "$service" == "emogirls" ]]; then
+		file_url=$(jq -r ".url" <$response_video)
 	fi
 
 	if [[ "$file_url" != "null" ]]; then
@@ -276,12 +286,14 @@ abort_upload() {
 		exit 0
 	fi
 }
-
+set -x
 upload_shot() {
 	if [[ "$service" == "e-z" ]]; then
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "key: "$auth -w "%{http_code}" -o $response -s "$url")
 	elif [[ "$service" == "nest" ]]; then
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "Authorization: "$auth -w "%{http_code}" -o $response -s "$url")
+	elif [[ "$service" == "emogirls" ]]; then
+		upload_image=$(curl -X POST -F "file=@"$temp_file -H "X-API-Key: "$auth -w "%{http_code}" -o $response -s "$url")
 	fi
 
 	http_code="${upload_image: -3}"
@@ -365,6 +377,8 @@ upload_shot() {
 			image_url=$(cat $response | jq -r .imageUrl)
 		elif [[ "$service" == "nest" ]]; then
 			image_url=$(cat $response | jq -r .fileURL)
+		elif [[ "$service" == "emogirls" ]]; then
+			image_url=$(cat $response | jq -r .url)
 		fi
 		if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
 			echo $image_url | wl-copy
@@ -372,7 +386,6 @@ upload_shot() {
 			echo $image_url | xclip -sel c
 		fi
 		
-		# Save screenshot if photosave is enabled
 		if [[ "$photosave" == true ]]; then
 			mkdir -p "$(eval echo $photodir)" 2>/dev/null
 			cp "$temp_file" "$(eval echo $photodir)/screenshot_$(date +%Y%m%d_%H%M%S).png"
@@ -381,7 +394,6 @@ upload_shot() {
 		
 		notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
 		
-		# Remove temp file if not saving
 		if [[ "$photosave" != true ]]; then
 			rm $temp_file
 		fi

@@ -26,7 +26,7 @@ check_dependencies
 
 initial_setup() {
 	echo -e "Initializing.."
-	services=("e-z" "nest" "none")
+	services=("e-z" "nest" "emogirls" "none")
 	selected=0
 
 	find "$SCRIPT_DIR/components" -type f -exec chmod +x {} \;

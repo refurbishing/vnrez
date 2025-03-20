@@ -7,6 +7,7 @@ fi
 
 ez="https://api.e-z.host/files"
 nest="https://nest.rip/api/files/upload"
+emogirls="https://upload-test.emogir.ls/upload"
 
 ez_shortener="https://api.e-z.gg/shortener"
 nest_shortener="https://nest.rip/api/shorts"
@@ -54,6 +55,8 @@ if [ "$service" = "e-z" ]; then
 	url=$ez
 elif [ "$service" = "nest" ]; then
 	url=$nest
+elif [ "$service" = "emogirls" ]; then
+	url=$emogirls
 fi
 
 valid_cases=(
