@@ -79,6 +79,4 @@ fi
 
 upload_shot
 
-
-rm $temp_file
 exit 0

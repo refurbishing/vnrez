@@ -286,7 +286,7 @@ abort_upload() {
 		exit 0
 	fi
 }
-set -x
+
 upload_shot() {
 	if [[ "$service" == "e-z" ]]; then
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "key: "$auth -w "%{http_code}" -o $response -s "$url")
