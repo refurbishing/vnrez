@@ -49,6 +49,10 @@ if [ "$service" = "e-z" ]; then
 	auth=$ez_auth
 elif [ "$service" = "nest" ]; then
 	auth=$nest_auth
+elif [[ -f "$CONFIG_DIR/${service}.service" ]]; then
+	source "$CONFIG_DIR/${service}.service"
+	url=$request_url
+	auth=$auth_token
 fi
 
 if [ "$service" = "e-z" ]; then
@@ -69,6 +73,7 @@ valid_cases=(
     "shot"
     "record"
     "shorten"
+    "add"
 )
 
 if [ "$XDG_CURRENT_DESKTOP" = "Hyprland" ] && [[ "$grimshot" = true && "$blast" = true ]]; then

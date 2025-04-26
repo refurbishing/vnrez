@@ -1,10 +1,10 @@
-# VNREZ Tool [<img src="./assets/logo.png" width="225" align="left" alt="VNREZ Logo">](https://github.com/verysillycat/vnrez)
+# VNREZ Tool [<img src="./assets/logo.png" width="225" align="left" alt="VNREZ Logo">](https://github.com/refurbishing/vnrez)
 
 #### Make Recordings & Screenshots and upload them to your favorite file hosts on Linux with support for region, GIF, audio and URL Shortening at ease.
 
-[![Total Commits](https://img.shields.io/github/commit-activity/t/verysillycat/vnrez?style=flat&logo=github&label=Commits&labelColor=%230f0f0f&color=%23191919)](https://github.com/verysillycat/vnrez/commits/)
+[![Total Commits](https://img.shields.io/github/commit-activity/t/refurbishing/vnrez?style=flat&logo=github&label=Commits&labelColor=%230f0f0f&color=%23191919)](https://github.com/refurbishing/vnrez/commits/)
 <br>
-[![Last commit](https://img.shields.io/github/last-commit/verysillycat/vnrez?style=flat&logo=git&logoColor=d16d38&label=Activity&labelColor=%230F0F0F&color=1A1A1A)](https://github.com/verysillycat/vnrez/commits/)
+[![Last commit](https://img.shields.io/github/last-commit/refurbishing/vnrez?style=flat&logo=git&logoColor=d16d38&label=Activity&labelColor=%230F0F0F&color=1A1A1A)](https://github.com/refurbishing/vnrez/commits/)
 <br><br><br><br>
 
 ## Dependencies
@@ -47,7 +47,7 @@ Go to your prefered terminal and execute this command depending on your Distro.
 
 
 ```bash
-git clone https://github.com/verysillycat/vnrez
+git clone https://github.com/refurbishing/vnrez
 cd vnrez
 # [!] Start the Script to Create the Configuration file
 ./vnrez.sh
@@ -66,6 +66,7 @@ Now paste that API KEY when doing the initial setup.
 - `config` open the configuration file in the default text editor
 - `reinstall` reinstall the configuration file with default settings
 - `auto` run with default settings without using a config file
+- `add` create a service file to add another service 
 
 ### Screenshot
  <small><strong>case: shot</strong></small>

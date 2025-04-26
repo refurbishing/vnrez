@@ -13,6 +13,28 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
+# Parse --host argument
+for arg in "$@"; do
+	if [[ "$arg" == "--host" ]]; then
+		host_override=true
+	elif [[ "$host_override" == true ]]; then
+		override_service="$arg"
+		host_override=false
+	fi
+done
+
+if [[ -n "$override_service" ]]; then
+	# Try to source the service file for the override
+	override_service_file="$CONFIG_DIR/${override_service}.service"
+	if [[ -f "$override_service_file" ]]; then
+		source "$override_service_file"
+		service="$override_service"
+	else
+		echo -e "\e[31mERROR: Service '$override_service' not found in $CONFIG_DIR.\e[0m"
+		exit 1
+	fi
+fi
+
 handle_cases
 handle_args "$1" "$2" "$3"
 
@@ -26,7 +48,7 @@ check_dependencies
 
 initial_setup() {
 	echo -e "Initializing.."
-	services=("e-z" "nest" "emogirls" "none")
+	services=("e-z" "nest" "emogirls" "custom" "none")
 	selected=0
 
 	find "$SCRIPT_DIR/components" -type f -exec chmod +x {} \;
@@ -72,6 +94,12 @@ initial_setup() {
 					echo -e "\e[32m◆ ${services[$i]}\e[0m"
 				else
 					echo "◇ ${services[$i]}"
+				fi
+			elif [[ "${services[$i]}" == "custom" ]]; then
+				if [[ $i -eq $selected ]]; then
+					echo -e "\e[32m⬢ ${services[$i]}\e[0m"
+				else
+					echo "⬡ ${services[$i]}"
 				fi
 			else
 				if [[ $i -eq $selected ]]; then
@@ -119,7 +147,7 @@ initial_setup() {
 
 	tput cnorm
 
-	if [[ "$service" != "none" ]]; then
+	if [[ "$service" != "custom" && "$service" != "none" && "$prompt_service" != true ]]; then
 		echo -e "\e[33mEnter your API Key for $service:\e[0m"
 		echo -n "✦ ) "
 		auth_token=""
@@ -159,77 +187,154 @@ initial_setup() {
 		done
 	fi
 
-	screenshot_tools=()
-	if command -v flameshot >/dev/null; then
-		screenshot_tools+=("flameshot")
-	fi
-	if command -v grim >/dev/null; then
-		screenshot_tools+=("grimshot")
+	if [[ "$service" == "custom" ]]; then
+		handle_custom_service
+		if [[ $? -eq 0 ]]; then
+			service_file="$CONFIG_DIR/${service_name}.service"
+			source "$service_file"
+			service="$service_name"
+			auth_token="$auth_token"
+		else
+			echo -e "\e[31mFailed to set up custom service. Please try again.\e[0m"
+			exit 1
+		fi
 	fi
 
-	selected=0
-	tput sc
+	if [[ "$prompt_service" == true ]]; then
+		echo -e "\e[33mEnter your API Key for $service:\e[0m"
+		echo -n "✦ ) "
+		auth_token=""
+		while [[ -z "$auth_token" || ${#auth_token} -lt 30 ]]; do
+			while IFS= read -r -s -n1 char; do
+				if [[ $char == "" ]]; then
+					echo
+					break
+				fi
+				if [[ $char == $'\x7f' ]]; then
+					if [[ -n $auth_token ]]; then
+						auth_token=${auth_token%?}
+						echo -ne "\b \b"
+					fi
+				else
+					auth_token+="$char"
+					echo -n "*"
+				fi
+			done
 
-	while true; do
-		trap handle_resize SIGWINCH
-		tput rc
-		tput civis
-		tput el
-		echo -e "\e[33mChoose your screenshot tool:\e[0m"
-		for i in "${!screenshot_tools[@]}"; do
-			if [[ $i -eq $selected ]]; then
-				echo -e "\e[32m• ${screenshot_tools[$i]}\e[0m"
-			else
-				echo "◦ ${screenshot_tools[$i]}"
+			if [[ -z "$auth_token" ]]; then
+				echo -e "\e[31mAPI Key cannot be empty!\e[0m"
+			elif [[ ${#auth_token} -lt 30 ]]; then
+				echo -e "\e[31mAPI Key isn't valid!\e[0m"
+			fi
+
+			if [[ -z "$auth_token" || ${#auth_token} -lt 30 ]]; then
+				sleep 1
+				tput cuu1
+				tput el
+				tput cuu1
+				tput el
+				tput cuu1
+				tput el
+				printf "\e[33mEnter your API Key for $service:\e[0m\n✦ ) "
 			fi
 		done
 
-		read -rsn1 input
-		case $input in
-		$'\x1b')
-			read -rsn2 -t 0.1 input
-			if [[ $input == "[A" ]]; then
-				((selected--))
-				if [[ $selected -lt 0 ]]; then
-					selected=$((${#screenshot_tools[@]} - 1))
-				fi
-			elif [[ $input == "[B" ]]; then
-				((selected++))
-				if [[ $selected -ge ${#screenshot_tools[@]} ]]; then
-					selected=0
+		service_file="$CONFIG_DIR/${service}.service"
+		mkdir -p "$CONFIG_DIR"
+
+		cat > "$service_file" <<EOL
+service_name="$service"
+auth_token="$auth_token"
+EOL
+
+		if [[ -f "$service_file" ]]; then
+			echo -e "\e[33mDo you want to set this service as default? (Y/N):\e[0m"
+			echo -n "✦ ) "
+			read -r set_default
+			sleep 0.1
+			if [[ "$set_default" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+				if [[ -f "$CONFIG_FILE" ]]; then
+					source "$CONFIG_FILE"
+					create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$videodir" "$failsave" "$videosave" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif" "$domain" "$subdomain" "$length" "$urltype" "$photosave" "$photodir"
+				else
+					create_config "$service" "$auth_token"
 				fi
 			fi
-			;;
-		"")
-			screenshot_tool=${screenshot_tools[$selected]}
-			break
-			;;
-		esac
-	done
+			return
+		else
+			echo -e "\e[31mFailed to create service file. Please check permissions.\e[0m"
+			return 1
+		fi
+	fi
 
-	if [[ "$screenshot_tool" == "grimshot" ]]; then
-		grimshot=true
-		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
-			echo -ne "\e[33mWould you like to use grimblast? (Y/N):\e[0m "
-			tput cnorm
-			read -r user_choice
+	if [[ "$prompt_service" != true ]]; then
+		screenshot_tools=()
+		if command -v flameshot >/dev/null; then
+			screenshot_tools+=("flameshot")
+		fi
+		if command -v grim >/dev/null; then
+			screenshot_tools+=("grimshot")
+		fi
 
-			if [[ "$user_choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
-				blast=true
+		selected=0
+		tput sc
+
+		while true; do
+			trap handle_resize SIGWINCH
+			tput rc
+			tput civis
+			tput el
+			echo -e "\e[33mChoose your screenshot tool:\e[0m"
+			for i in "${!screenshot_tools[@]}"; do
+				if [[ $i -eq $selected ]]; then
+					echo -e "\e[32m• ${screenshot_tools[$i]}\e[0m"
+				else
+					echo "◦ ${screenshot_tools[$i]}"
+				fi
+			done
+
+			read -rsn1 input
+			case $input in
+			$'\x1b')
+				read -rsn2 -t 0.1 input
+				if [[ $input == "[A" ]]; then
+					((selected--))
+					if [[ $selected -lt 0 ]]; then
+						selected=$((${#screenshot_tools[@]} - 1))
+					fi
+				elif [[ $input == "[B" ]]; then
+					((selected++))
+					if [[ $selected -ge ${#screenshot_tools[@]} ]]; then
+						selected=0
+					fi
+				fi
+				;;
+			"")
+				screenshot_tool=${screenshot_tools[$selected]}
+				break
+				;;
+			esac
+		done
+
+		if [[ "$screenshot_tool" == "grimshot" ]]; then
+			grimshot=true
+			if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
+				echo -ne "\e[33mWould you like to use grimblast? (Y/N):\e[0m "
+				tput cnorm
+				read -r user_choice
+
+				if [[ "$user_choice" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+					blast=true
+				else
+					blast=false
+				fi
 			else
 				blast=false
 			fi
 		else
+			grimshot=false
 			blast=false
 		fi
-	else
-		grimshot=false
-		blast=false
-	fi
-
-	if [[ "$prompt_service" == true ]]; then
-		create_config "$service" "$auth_token"
-		return
 	fi
 
 	if [[ ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) && "$XDG_SESSION_TYPE" != "x11" ]]; then
@@ -562,6 +667,119 @@ initial_setup() {
 	create_config "$service" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$videodir" "$failsave" "$videosave" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif" "$domain" "$subdomain" "$length" "$urltype" "$photosave" "$photodir"
 }
 
+handle_custom_service() {
+	echo -e "\e[33mDo you want to import a sxcu file? (Y/N):\e[0m"
+	echo -n "✦ ) "
+	read -r import_sxcu
+	sleep 0.1
+
+	if [[ "$import_sxcu" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+		echo -e "\e[33mEnter the path to your sxcu file:\e[0m"
+		echo -n "✦ ) "
+		read -r sxcu_path
+		sleep 0.1
+
+		if [[ ! -f "$sxcu_path" ]]; then
+			echo -e "\e[31mFile not found: $sxcu_path\e[0m"
+			return 1
+		fi
+
+		service_name=$(jq -r '.Name' "$sxcu_path" \
+			| sed -E 's/https?:\/\///g; s/[^[:alnum:]]+/_/g; s/^_+|_+$//g; s/_+/_/g' \
+			| tr '[:upper:]' '[:lower:]')
+
+		echo -e "\e[33mDetected service name: $service_name"
+		echo -e "Do you want to use this name? (Y/N):\e[0m"
+		echo -n "✦ ) "
+		read -r use_default_name
+		sleep 0.1
+		if [[ ! "$use_default_name" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+			echo -e "\e[33mEnter your custom service name:\e[0m"
+			echo -n "✦ ) "
+			read -r custom_service_name
+			service_name=$(echo "$custom_service_name" | tr ' ' '_' | tr -cd '[:alnum:]_-')
+			sleep 0.1
+		fi
+
+		request_url=$(jq -r '.RequestURL' "$sxcu_path")
+		file_form_name=$(jq -r '.FileFormName' "$sxcu_path")
+		auth_header=$(jq -r '.Headers | keys[0]' "$sxcu_path")
+		url_json_path=$(jq -r '.URL' "$sxcu_path" | sed 's/{json://;s/}//')
+		deletion_url_json_path=$(jq -r '.DeletionURL' "$sxcu_path" | sed 's/{json://;s/}//')
+		error_json_path=$(jq -r '.ErrorMessage' "$sxcu_path" | sed 's/{json://;s/}//')
+		
+		auth_token=$(jq -r ".Headers.$auth_header" "$sxcu_path")
+	else
+		echo -e "\e[33mEnter service name:\e[0m"
+		echo -n "✦ ) "
+		read -r service_name
+		service_name=$(echo "$service_name" | tr ' ' '_' | tr -cd '[:alnum:]_-')
+		sleep 0.1
+
+		echo -e "\e[33mEnter request URL:\e[0m"
+		echo -n "✦ ) "
+		read -r request_url
+		sleep 0.1
+
+		echo -e "\e[33mEnter file form name:\e[0m"
+		echo -n "✦ ) "
+		read -r file_form_name
+		sleep 0.1
+
+		echo -e "\e[33mEnter authorization header name:\e[0m"
+		echo -n "✦ ) "
+		read -r auth_header
+		sleep 0.1
+
+		echo -e "\e[33mEnter URL JSON path (ex. fileURL):\e[0m"
+		echo -n "✦ ) "
+		read -r url_json_path
+		sleep 0.1
+
+		echo -e "\e[33mEnter error message JSON path (optional):\e[0m"
+		echo -n "✦ ) "
+		read -r error_json_path
+		sleep 0.1
+
+		echo -e "\e[33mEnter your API key for $service_name:\e[0m"
+		echo -n "✦ ) "
+		read -r auth_token
+		sleep 0.1
+	fi
+
+	service_file="$CONFIG_DIR/${service_name}.service"
+	mkdir -p "$CONFIG_DIR"
+
+	cat > "$service_file" <<EOL
+service_name="$service_name"
+request_url="$request_url"
+file_form_name="$file_form_name"
+auth_header="$auth_header"
+url_json_path="$url_json_path"
+error_json_path="$error_json_path"
+auth_token="$auth_token"
+EOL
+
+	if [[ -f "$service_file" ]]; then
+		echo -e "\e[33mDo you want to set this service as default? (Y/N):\e[0m"
+		echo -n "✦ ) "
+		read -r set_default
+		sleep 0.1
+		if [[ "$set_default" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+			if [[ -f "$CONFIG_FILE" ]]; then
+				source "$CONFIG_FILE"
+				create_config "$service_name" "$auth_token" "$fps" "$crf" "$preset" "$pixelformat" "$extpixelformat" "$wlscreenrec" "$codec" "$videodir" "$failsave" "$videosave" "$encoder" "$startnotif" "$endnotif" "$grimshot" "$blast" "$bitrate" "$shortener_notif" "$domain" "$subdomain" "$length" "$urltype" "$photosave" "$photodir"
+			else
+				create_config "$service_name" "$auth_token"
+			fi
+		fi
+		return 0
+	else
+		echo -e "\e[31mFailed to create service file. Please check permissions.\e[0m"
+		return 1
+	fi
+}
+
 if [[ "$1" == "config" || ( "$1" == "auto" && "$2" == "config" ) ]]; then
 	if [[ ! -f "$CONFIG_FILE" ]]; then
 		initial_setup
@@ -591,11 +809,29 @@ if [[ "$1" == "reinstall" || ( "$1" == "auto" && "$2" == "reinstall" ) ]]; then
 	exit 0
 fi
 
+if [[ "$1" == "add" || ( "$1" == "auto" && "$2" == "add" ) ]]; then
+	if [[ -f "$CONFIG_FILE" && "$service" != "none" && -n "$service" ]]; then
+		echo -e "\e[33mIs the host you want to add one of the following: nest, e-z, or emogirls? (Y/N):\e[0m"
+		echo -n "✦ ) "
+		read -r is_special_host
+		if [[ "$is_special_host" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then
+			prompt_service=true
+			initial_setup
+			exit 0
+		fi
+		handle_custom_service
+	else
+		echo -e "\033[1;31mERROR:\033[0m You must have a service configured before you can add another."
+		echo "Please run the initial setup first."
+	fi
+	exit 0
+fi
+
 if [[ ! -f "$CONFIG_FILE" && ! ( "$1" == "auto" && ( "$2" == "record" || "$2" == "shot" )) ]]; then
 	initial_setup
 fi
 
-if [[ "$1" == "auto" ]] || [[ ! -f "$CONFIG_FILE" && $(command -v grim) && ! $(command -v flameshot) && "$XDG_SESSION_TYPE" != "x11" && "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" && "$XDG_CURRENT_DESKTOP" != "X-Cinnamon" ]]; then
+if [[ "$1" == "auto" ]] || [[ ! -f "$CONFIG_FILE" && -n "$(command -v grim)" && -z "$(command -v flameshot)" && "$XDG_SESSION_TYPE" != "x11" && "$XDG_CURRENT_DESKTOP" != "GNOME" && "$XDG_CURRENT_DESKTOP" != "KDE" && "$XDG_CURRENT_DESKTOP" != "COSMIC" && "$XDG_CURRENT_DESKTOP" != "X-Cinnamon" ]]; then
     grimshot=true
     if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" ]]; then
         blast=true
@@ -701,8 +937,8 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 						initial_setup
 						exec "$0" "$@"
 					fi
-			else
-				tput cnorm
+				else
+					tput cnorm
 					if [[ "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
 						default_save_dir="$(eval echo $kooha_dir)"
 					else

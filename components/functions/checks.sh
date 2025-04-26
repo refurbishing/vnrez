@@ -100,7 +100,7 @@ check_dependencies() {
 		formatted_deps=$(echo "$formatted_deps" | sed 's/, \([^,]*\)$/ \& \1/')
 		echo -e "\e[31mMissing Dependencies: \033[37;7m${formatted_deps}\033[0m\e[0m"
 		echo "These are the required dependencies, install them and try again."
-		notify-send "Missing Dependencies" "${formatted_deps}" -a "VNEZ"
+		notify-send "Missing Dependencies" "${formatted_deps}" -a "VNREZ"
 		exit 1
 	fi
 }

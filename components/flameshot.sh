@@ -38,7 +38,7 @@ if [[ -z "$1" || "$1" == "--gui" || "$2" == "--gui" || (-z "$2" || "$1" == "auto
 	flameshot gui -r >$temp_file &
 	# end-4's hyprland dotfiles detection
 	if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && -n "$(command -v pacman)" ]]; then
-		if pacman -Q | grep -q 'illogical-impulse-ags'; then
+		if pacman -Q | grep -q 'illogical-impulse-gnome'; then
 			ags run-js "closeEverything();" >/dev/null 2>&1
 		fi
 	fi

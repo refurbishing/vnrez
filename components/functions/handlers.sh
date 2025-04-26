@@ -12,24 +12,24 @@ fi
 
 handle_args() {
     if [[ ("$1" == "auto" && -n "$3") && "$2" != "upload" && "$2" != "-u" ]]; then
-        if [[ "$2" == "shot" && ! " ${shot_args[@]} " =~ " $3 " ]]; then
+        if [[ "$2" == "shot" && "$3" != "--host" && ! " ${shot_args[@]} " =~ " $3 " ]]; then
             notify-send "Invalid argument: $3" -a "VNREZ Recorder"
             echo "Argument: \"$3\" is not a valid shot argument."
             echo "Use --help or -h to see the list of valid arguments."
             exit 1
-        elif [[ "$2" == "record" && ! " ${record_args[@]} " =~ " $3 " ]]; then
+        elif [[ "$2" == "record" && "$3" != "--host" && ! " ${record_args[@]} " =~ " $3 " ]]; then
             notify-send "Invalid argument: $3" -a "VNREZ Recorder"
             echo "Argument: \"$3\" is not a valid record argument."
             echo "Use --help or -h to see the list of valid arguments."
             exit 1
         fi
     elif [[ -n "$2" && "$1" != "-u" && "$1" != "upload" ]]; then
-        if [[ "$1" == "shot" && ! " ${shot_args[@]} " =~ " $2 " ]]; then
+        if [[ "$1" == "shot" && "$2" != "--host" && ! " ${shot_args[@]} " =~ " $2 " ]]; then
             notify-send "Invalid argument: $2" -a "VNREZ Recorder"
             echo "Argument: \"$2\" is not a valid shot argument."
             echo "Use --help or -h to see the list of valid arguments."
             exit 1
-        elif [[ "$1" == "record" && ! " ${record_args[@]} " =~ " $2 " ]]; then
+        elif [[ "$1" == "record" && "$2" != "--host" && ! " ${record_args[@]} " =~ " $2 " ]]; then
             notify-send "Invalid argument: $2" -a "VNREZ Recorder"
             echo "Argument: \"$2\" is not a valid record argument."
             echo "Use --help or -h to see the list of valid arguments."

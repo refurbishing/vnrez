@@ -76,7 +76,7 @@ kooha_dir="~/Videos/Kooha"
 EOL
 
 	if [[ "$prompt_service" != true ]]; then
-		notify-send "Configuration Created" "VNEZ configuration has been created successfully" -a "VNEZ Recorder"
+		notify-send "Configuration Created" "VNREZ configuration has been created successfully" -a "VNREZ"
 	fi
 }
 

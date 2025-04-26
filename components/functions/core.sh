@@ -34,6 +34,14 @@ upload_video() {
 		http_code=$(curl -X POST -F "file=@${file}" -H "Authorization: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	elif [[ "$service" == "emogirls" ]]; then
 		http_code=$(curl -X POST -F "file=@${file}" -H "X-API-Key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
+	else
+		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
+			source "$CONFIG_DIR/${service}.service"
+			http_code=$(curl -X POST -F "${file_form_name}=@${file}" -H "${auth_header}: ${auth_token}" -w "%{http_code}" -o $response_video -s "${request_url}")
+		else
+			notify-send "Error: Custom service '$service' not found" -a "VNREZ Recorder"
+			exit 1
+		fi
 	fi
 
 	if ! jq -e . >/dev/null 2>&1 <$response_video; then
@@ -67,6 +75,20 @@ upload_video() {
 		if [[ "$http_code" -eq 200 && "$success" == "null" ]]; then
 			success="true"
 		fi
+	else
+		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
+			source "$CONFIG_DIR/${service}.service"
+			if [[ -n "$error_json_path" ]]; then
+				error=$(jq -r ".$error_json_path" <$response_video)
+				if [[ "$error" != "null" ]]; then
+					success="false"
+				else
+					success="true"
+				fi
+			else
+				success="true"
+			fi
+		fi
 	fi
 
 	if [[ "$success" != "true" ]] || [[ "$success" == "null" ]]; then
@@ -98,6 +120,11 @@ upload_video() {
 		file_url=$(jq -r ".fileURL" <$response_video)
 	elif [[ "$service" == "emogirls" ]]; then
 		file_url=$(jq -r ".url" <$response_video)
+	else
+		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
+			source "$CONFIG_DIR/${service}.service"
+			file_url=$(jq -r ".$url_json_path" <$response_video)
+		fi
 	fi
 
 	if [[ "$file_url" != "null" ]]; then
@@ -294,6 +321,14 @@ upload_shot() {
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "Authorization: "$auth -w "%{http_code}" -o $response -s "$url")
 	elif [[ "$service" == "emogirls" ]]; then
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "X-API-Key: "$auth -w "%{http_code}" -o $response -s "$url")
+	else
+		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
+			source "$CONFIG_DIR/${service}.service"
+			upload_image=$(curl -X POST -F "${file_form_name}=@"$temp_file -H "${auth_header}: "$auth_token -w "%{http_code}" -o $response -s "$request_url")
+		else
+			notify-send "Error: Custom service '$service' not found" -a "Flameshot"
+			exit 1
+		fi
 	fi
 
 	http_code="${upload_image: -3}"
@@ -372,31 +407,37 @@ upload_shot() {
 		
 		rm $temp_file
 		exit 1
+	fi
+
+	if [[ "$service" == "e-z" ]]; then
+		image_url=$(cat $response | jq -r .imageUrl)
+	elif [[ "$service" == "nest" ]]; then
+		image_url=$(cat $response | jq -r .fileURL)
+	elif [[ "$service" == "emogirls" ]]; then
+		image_url=$(cat $response | jq -r .url)
 	else
-		if [[ "$service" == "e-z" ]]; then
-			image_url=$(cat $response | jq -r .imageUrl)
-		elif [[ "$service" == "nest" ]]; then
-			image_url=$(cat $response | jq -r .fileURL)
-		elif [[ "$service" == "emogirls" ]]; then
-			image_url=$(cat $response | jq -r .url)
+		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
+			source "$CONFIG_DIR/${service}.service"
+			image_url=$(cat $response | jq -r ".$url_json_path")
 		fi
-		if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-			echo $image_url | wl-copy
-		else
-			echo $image_url | xclip -sel c
-		fi
-		
-		if [[ "$photosave" == true ]]; then
-			mkdir -p "$(eval echo $photodir)" 2>/dev/null
-			cp "$temp_file" "$(eval echo $photodir)/screenshot_$(date +%Y%m%d_%H%M%S).png"
-			notify-send "Screenshot saved" "$(eval echo $photodir)/" -a "Flameshot" -i $temp_file
-		fi
-		
-		notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
-		
-		if [[ "$photosave" != true ]]; then
-			rm $temp_file
-		fi
+	fi
+
+	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
+		echo $image_url | wl-copy
+	else
+		echo $image_url | xclip -sel c
+	fi
+	
+	if [[ "$photosave" == true ]]; then
+		mkdir -p "$(eval echo $photodir)" 2>/dev/null
+		cp "$temp_file" "$(eval echo $photodir)/screenshot_$(date +%Y%m%d_%H%M%S).png"
+		notify-send "Screenshot saved" "$(eval echo $photodir)/" -a "Flameshot" -i $temp_file
+	fi
+	
+	notify-send "Image URL copied to clipboard" -a "Flameshot" -i $temp_file
+	
+	if [[ "$photosave" != true ]]; then
+		rm $temp_file
 	fi
 }
 
