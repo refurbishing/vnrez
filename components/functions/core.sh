@@ -35,8 +35,8 @@ upload_video() {
 	elif [[ "$service" == "emogirls" ]]; then
 		http_code=$(curl -X POST -F "file=@${file}" -H "X-API-Key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	else
-		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
-			source "$CONFIG_DIR/${service}.service"
+		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
+			source "$CONFIG_DIR/services/${service}"
 			http_code=$(curl -X POST -F "${file_form_name}=@${file}" -H "${auth_header}: ${auth_token}" -w "%{http_code}" -o $response_video -s "${request_url}")
 		else
 			notify-send "Error: Custom service '$service' not found" -a "VNREZ Recorder"
@@ -76,8 +76,8 @@ upload_video() {
 			success="true"
 		fi
 	else
-		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
-			source "$CONFIG_DIR/${service}.service"
+		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
+			source "$CONFIG_DIR/services/${service}"
 			if [[ -n "$error_json_path" ]]; then
 				error=$(jq -r ".$error_json_path" <$response_video)
 				if [[ "$error" != "null" ]]; then
@@ -121,8 +121,8 @@ upload_video() {
 	elif [[ "$service" == "emogirls" ]]; then
 		file_url=$(jq -r ".url" <$response_video)
 	else
-		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
-			source "$CONFIG_DIR/${service}.service"
+		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
+			source "$CONFIG_DIR/services/${service}"
 			file_url=$(jq -r ".$url_json_path" <$response_video)
 		fi
 	fi
@@ -322,8 +322,8 @@ upload_shot() {
 	elif [[ "$service" == "emogirls" ]]; then
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "X-API-Key: "$auth -w "%{http_code}" -o $response -s "$url")
 	else
-		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
-			source "$CONFIG_DIR/${service}.service"
+		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
+			source "$CONFIG_DIR/services/${service}"
 			upload_image=$(curl -X POST -F "${file_form_name}=@"$temp_file -H "${auth_header}: "$auth_token -w "%{http_code}" -o $response -s "$request_url")
 		else
 			notify-send "Error: Custom service '$service' not found" -a "Flameshot"
@@ -416,8 +416,8 @@ upload_shot() {
 	elif [[ "$service" == "emogirls" ]]; then
 		image_url=$(cat $response | jq -r .url)
 	else
-		if [[ -f "$CONFIG_DIR/${service}.service" ]]; then
-			source "$CONFIG_DIR/${service}.service"
+		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
+			source "$CONFIG_DIR/services/${service}"
 			image_url=$(cat $response | jq -r ".$url_json_path")
 		fi
 	fi

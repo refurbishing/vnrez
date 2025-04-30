@@ -13,28 +13,6 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-# Parse --host argument
-for arg in "$@"; do
-	if [[ "$arg" == "--host" ]]; then
-		host_override=true
-	elif [[ "$host_override" == true ]]; then
-		override_service="$arg"
-		host_override=false
-	fi
-done
-
-if [[ -n "$override_service" ]]; then
-	# Try to source the service file for the override
-	override_service_file="$CONFIG_DIR/${override_service}.service"
-	if [[ -f "$override_service_file" ]]; then
-		source "$override_service_file"
-		service="$override_service"
-	else
-		echo -e "\e[31mERROR: Service '$override_service' not found in $CONFIG_DIR.\e[0m"
-		exit 1
-	fi
-fi
-
 handle_cases
 handle_args "$1" "$2" "$3"
 
@@ -190,7 +168,7 @@ initial_setup() {
 	if [[ "$service" == "custom" ]]; then
 		handle_custom_service
 		if [[ $? -eq 0 ]]; then
-			service_file="$CONFIG_DIR/${service_name}.service"
+			service_file="$CONFIG_DIR/services/${service_name}"
 			source "$service_file"
 			service="$service_name"
 			auth_token="$auth_token"
@@ -239,8 +217,8 @@ initial_setup() {
 			fi
 		done
 
-		service_file="$CONFIG_DIR/${service}.service"
-		mkdir -p "$CONFIG_DIR"
+		service_file="$CONFIG_DIR/services/${service}"
+		mkdir -p "$CONFIG_DIR/services"
 
 		cat > "$service_file" <<EOL
 service_name="$service"
@@ -703,12 +681,22 @@ handle_custom_service() {
 
 		request_url=$(jq -r '.RequestURL' "$sxcu_path")
 		file_form_name=$(jq -r '.FileFormName' "$sxcu_path")
-		auth_header=$(jq -r '.Headers | keys[0]' "$sxcu_path")
-		url_json_path=$(jq -r '.URL' "$sxcu_path" | sed 's/{json://;s/}//')
-		deletion_url_json_path=$(jq -r '.DeletionURL' "$sxcu_path" | sed 's/{json://;s/}//')
-		error_json_path=$(jq -r '.ErrorMessage' "$sxcu_path" | sed 's/{json://;s/}//')
 		
-		auth_token=$(jq -r ".Headers.$auth_header" "$sxcu_path")
+		auth_header=$(jq -r '.Headers | keys[0]' "$sxcu_path" 2>/dev/null)
+		if [[ "$auth_header" == "null" || -z "$auth_header" ]]; then
+			auth_header=$(jq -r '.Arguments | keys[0]' "$sxcu_path" 2>/dev/null)
+			if [[ "$auth_header" == "null" || -z "$auth_header" ]]; then
+				echo -e "\e[31mNo authentication method found in SXCU file\e[0m"
+				return 1
+			fi
+			auth_token=$(jq -r ".Arguments.$auth_header" "$sxcu_path")
+		else
+			auth_token=$(jq -r ".Headers.$auth_header" "$sxcu_path")
+		fi
+
+		url_json_path=$(jq -r '.URL' "$sxcu_path" | sed 's/{json://;s/\$json://;s/}//;s/\$//')
+		deletion_url_json_path=$(jq -r '.DeletionURL' "$sxcu_path" | sed 's/{json://;s/\$json://;s/}//;s/\$//')
+		error_json_path=$(jq -r '.ErrorMessage' "$sxcu_path" | sed 's/{json://;s/\$json://;s/}//;s/\$//')
 	else
 		echo -e "\e[33mEnter service name:\e[0m"
 		echo -n "✦ ) "
@@ -747,8 +735,8 @@ handle_custom_service() {
 		sleep 0.1
 	fi
 
-	service_file="$CONFIG_DIR/${service_name}.service"
-	mkdir -p "$CONFIG_DIR"
+	service_file="$CONFIG_DIR/services/${service_name}"
+	mkdir -p "$CONFIG_DIR/services"
 
 	cat > "$service_file" <<EOL
 service_name="$service_name"

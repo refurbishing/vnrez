@@ -49,8 +49,8 @@ if [ "$service" = "e-z" ]; then
 	auth=$ez_auth
 elif [ "$service" = "nest" ]; then
 	auth=$nest_auth
-elif [[ -f "$CONFIG_DIR/${service}.service" ]]; then
-	source "$CONFIG_DIR/${service}.service"
+elif [[ -f "$CONFIG_DIR/services/${service}" ]]; then
+	source "$CONFIG_DIR/services/${service}"
 	url=$request_url
 	auth=$auth_token
 fi
