@@ -28,7 +28,7 @@ Go to your prefered terminal and execute this command depending on your Distro.
 | Compositor | Distribution      | Instructions                                                                  |
 | ---------- | ----------------- | ----------------------------------------------------------------------------- |
 | **X11**    | **Debian/Ubuntu** | `sudo apt install ffmpeg jq xclip slop`                                       |
-| **X11**    | **Fedora**        | `sudo apt install ffmpeg jq xclip slop`                                       |
+| **X11**    | **Fedora**        | `sudo dnf install ffmpeg jq xclip slop`                                       |
 | **X11**    | **Arch**          | `sudo pacman -S ffmpeg jq xclip slop`                                         |
 | **X11**    | **Gentoo**        | `sudo emerge -av media-video/ffmpeg app-misc/jq x11-misc/xclip x11-misc/slop` |
 
@@ -40,6 +40,18 @@ Go to your prefered terminal and execute this command depending on your Distro.
 | **COSMIC & GNOME / KDE Wayland** | **Gentoo**        | `sudo emerge -av media-video/kooha app-misc/jq x11-misc/wl-clipboard` |
 
  </details>
+
+<details>
+<summary>Which Services Are supported?</summary>
+By default you can use these:
+- [e-z](https://e-z.host)
+- [nest](https://nest.rip)
+- [emogir.ls](https://emogir.ls)
+
+You can always just use the **custom** option which will allow all json image hosts uploaders.
+or you could just choose **none** which will just copy the file directly to your clipboard
+</details>
+
 
 ## Installation
 

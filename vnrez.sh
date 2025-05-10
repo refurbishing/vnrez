@@ -986,36 +986,13 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 			base_options=("sound" "fullscreen-sound" "fullscreen" "no-sound" "gif" "abort")
 		fi
 	elif [[ "$choice" == "shot" ]]; then
-		acquire_lock
-		if command -v grim >/dev/null; then
-			if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
-				if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-					"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
-				else
-					"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
-				fi
-			elif [[ "$grimshot" == true && "$blast" == false ]]; then
-				if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-					"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
-				else
-					"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
-				fi
-			else
-				if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-					"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
-				else
-					"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
-				fi
-			fi
-		else
-			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-				"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
-			else
-				"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
-			fi
+		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
+			base_options=("output" "screen" "active" "area" "freeze")
+		elif [[ "$grimshot" == true && "$blast" == false ]]; then
+			base_options=("screen" "area" "freeze")
+		elif [[ "$grimshot" == false ]]; then
+			base_options=("gui" "full" "screen")
 		fi
-		release_lock
-		exit 0
 	elif [[ "$choice" == "shortener" ]]; then
 		base_options=("start" "target" "stop" "enable" "disable" "logs")
 	fi
@@ -1112,33 +1089,47 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 
 	tput cnorm
 	if [[ "$choice" == "record" ]]; then
-		if [[ "$sub_choice" == "none" && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
-			sleep 0.5
-			"$SCRIPT_DIR/components/record.sh" &>/dev/null
+		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
+			if [[ "$sub_choice" != "abort" ]]; then
+				"$SCRIPT_DIR/components/record.sh" auto
+				sleep 0.2
+				exec "$0" "$@"
+			else
+				sleep 0.5
+				"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
+			fi
 		else
-			sleep 0.5
-			"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
+			if [[ "$sub_choice" == "none" && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
+				sleep 0.5
+				"$SCRIPT_DIR/components/record.sh" &>/dev/null
+			else
+				sleep 0.5
+				"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
+			fi
 		fi
 	elif [[ "$choice" == "shot" ]]; then
+		acquire_lock
 		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
 			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-				"$SCRIPT_DIR/components/grimblast.sh" auto "${@:2}"
+				"$SCRIPT_DIR/components/grimblast.sh" auto "--$sub_choice" "${@:2}"
 			else
-				"$SCRIPT_DIR/components/grimblast.sh" "${@:2}"
+				"$SCRIPT_DIR/components/grimblast.sh" "--$sub_choice" "${@:2}"
 			fi
 		elif [[ "$grimshot" == true && "$blast" == false ]]; then
 			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-				"$SCRIPT_DIR/components/grimshot.sh" auto "${@:2}"
+				"$SCRIPT_DIR/components/grimshot.sh" auto "--$sub_choice" "${@:2}"
 			else
-				"$SCRIPT_DIR/components/grimshot.sh" "${@:2}"
+				"$SCRIPT_DIR/components/grimshot.sh" "--$sub_choice" "${@:2}"
 			fi
 		elif [[ "$grimshot" == false ]]; then
 			if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
-				"$SCRIPT_DIR/components/flameshot.sh" auto "${@:2}"
+				"$SCRIPT_DIR/components/flameshot.sh" auto "--$sub_choice" "${@:2}"
 			else
-				"$SCRIPT_DIR/components/flameshot.sh" "${@:2}"
+				"$SCRIPT_DIR/components/flameshot.sh" "--$sub_choice" "${@:2}"
 			fi
 		fi
+		release_lock
+		exit 0
 	elif [[ "$choice" == "shortener" ]]; then
 		if [[ "$sub_choice" == "target" ]]; then
 			echo -e "\e[33mEnter the URL to shorten:\e[0m"
