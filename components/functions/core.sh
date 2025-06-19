@@ -47,6 +47,8 @@ upload_video() {
 	if ! jq -e . >/dev/null 2>&1 <$response_video; then
 		if [[ "$http_code" == "413" ]]; then
 			notify-send "Recording too large." "Try a smaller recording or lower the settings." -a "VNREZ Recorder"
+		elif [[ "$http_code" == "000" ]]; then
+			notify-send "Network Error" "Check your internet connection or network settings." -a "VNREZ Recorder"
 		else
 			notify-send "Error occurred on upload." "Status Code: $http_code Please try again later." -a "VNREZ Recorder"
 		fi
