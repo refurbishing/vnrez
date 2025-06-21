@@ -34,6 +34,22 @@ getaudiooutput() {
 	pactl list sources | grep 'Name' | grep 'monitor' | cut -d ' ' -f2
 }
 
+wait_for_file() {
+    local file="$1"
+    local max_attempts=10
+    local attempt=1
+    
+    while [ $attempt -le $max_attempts ]; do
+        if [ -f "$file" ] && [ -s "$file" ]; then
+            sleep 0.5
+            return 0
+        fi
+        sleep 0.5
+        attempt=$((attempt + 1))
+    done
+    return 1
+}
+
 gif() {
 	local video_file=$1
 	local gif_file="${video_file%.mp4}.gif"
@@ -42,7 +58,7 @@ gif() {
 	echo "$gif_file"
 }
 
-if [[ "$save" == true && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
+if [[ "$videosave" == true && ! ("$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon")) ]]; then
 	mkdir -p "$(eval echo $directory)"
 	cd "$(eval echo $directory)" || exit
 else
@@ -73,7 +89,7 @@ if [[ "$1" == "--abort" || ( "$1" == "auto" && "$2" == "--abort" ) ]]; then
 			if [[ -f "$gif_pending_file" ]]; then
 				rm "$gif_pending_file"
 			fi
-			if [[ "$save" == false ]]; then
+			if [[ "$videosave" == false ]]; then
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
 				rm "$video_file"
 			fi
@@ -88,7 +104,7 @@ if [[ "$1" == "--abort" || ( "$1" == "auto" && "$2" == "--abort" ) ]]; then
 			if [[ -f "$gif_pending_file" ]]; then
 				rm "$gif_pending_file"
 			fi
-			if [[ "$save" == false ]]; then
+			if [[ "$videosave" == false ]]; then
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
 				rm "$video_file"
 			fi
@@ -99,7 +115,7 @@ if [[ "$1" == "--abort" || ( "$1" == "auto" && "$2" == "--abort" ) ]]; then
 			if [[ -f "$gif_pending_file" ]]; then
 				rm "$gif_pending_file"
 			fi
-			if [[ "$save" == false ]]; then
+			if [[ "$videosave" == false ]]; then
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
 				rm "$video_file"
 			fi
@@ -182,15 +198,25 @@ else
 				wait
 				[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
-				gif_file=$(gif "$video_file")
-				upload_video "$gif_file" "--gif"
+				if wait_for_file "$video_file"; then
+					gif_file=$(gif "$video_file")
+					upload_video "$gif_file" "--gif"
+				else
+					notify-send "Error: Recording file not ready" "Failed to access the recording file." -a "VNREZ Recorder"
+					exit 1
+				fi
 			else
 				[[ "$endnotif" == true ]] && notify-send -t 2000 "Recording Stopped" "Stopped" -a "VNREZ Recorder" &
 				pkill ffmpeg &
 				wait
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
-				[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
-				upload_video "$video_file"
+				if wait_for_file "$video_file"; then
+					[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
+					upload_video "$video_file"
+				else
+					notify-send "Error: Recording file not ready" "Failed to access the recording file." -a "VNREZ Recorder"
+					exit 1
+				fi
 			fi
 		else
 			if [[ "$1" == "--sound" || ( "$1" == "auto" && "$2" == "--sound" ) ]]; then
@@ -204,7 +230,7 @@ else
 				ffmpeg -video_size "${width}x${height}" -framerate $fps -f x11grab -i $DISPLAY+"${x},${y}" -f pulse -i "$(getaudiooutput)" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart -c:a aac -b:a 128k './recording_'"$(getdate)"'.mp4' &
 				disown
 			elif [[ "$1" == "--fullscreen-sound" || ( "$1" == "auto" && "$2" == "--fullscreen-sound" ) ]]; then
-				if [[ "$save" == true ]]; then
+				if [[ "$videosave" == true ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 				else
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'Started' -a "VNREZ Recorder"
@@ -212,7 +238,7 @@ else
 				ffmpeg -video_size $(getactivemonitor) -framerate $fps -f x11grab -i $DISPLAY -f pulse -i "$(getaudiooutput)" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -c:v $encoder -preset $preset -crf $crf -pix_fmt $pixelformat -movflags +faststart -c:a aac -b:a 128k './recording_'"$(getdate)"'.mp4' &
 				disown
 			elif [[ "$1" == "--fullscreen" || ( "$1" == "auto" && "$2" == "--fullscreen" ) ]]; then
-				if [[ "$save" == true ]]; then
+				if [[ "$videosave" == true ]]; then
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 				else
 					[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'Started' -a "VNREZ Recorder"
@@ -250,17 +276,27 @@ else
 				pkill "$recorder_command" &
 				wait
 				video_file=$(ls -t recording_*.mp4 | head -n 1)
-				[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
-				gif_file=$(gif "$video_file")
-				upload_video "$gif_file" "--gif"
+				if wait_for_file "$video_file"; then
+					[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
+					gif_file=$(gif "$video_file")
+					upload_video "$gif_file" "--gif"
+				else
+					notify-send "Error: Recording file not ready" "Failed to access the recording file." -a "VNREZ Recorder"
+					exit 1
+				fi
 			else
 				if [[ -z "$1" || "$1" == "--no-sound" || ( "$1" == "auto" && ( -z "$2" || "$2" == "--no-sound" )) ]]; then
 					[[ "$endnotif" == true ]] && notify-send -t 2000 "Recording Stopped" "Stopped" -a "VNREZ Recorder" &
 					pkill "$recorder_command" &
 					wait
 					video_file=$(ls -t recording_*.mp4 | head -n 1)
-					[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
-					upload_video "$video_file"
+					if wait_for_file "$video_file"; then
+						[[ "$colorworkaround" == true ]] && post_process_video "$video_file"
+						upload_video "$video_file"
+					else
+						notify-send "Error: Recording file not ready" "Failed to access the recording file." -a "VNREZ Recorder"
+						exit 1
+					fi
 				fi
 			fi
 		else
@@ -279,7 +315,7 @@ else
 					fi
 					disown
 				elif [[ "$1" == "--fullscreen-sound" || ( "$1" == "auto" && "$2" == "--fullscreen-sound" ) ]]; then
-					if [[ "$save" == true ]]; then
+					if [[ "$videosave" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'Started' -a "VNREZ Recorder"
@@ -292,7 +328,7 @@ else
 					eval "$command" &
 					disown
 				elif [[ "$1" == "--fullscreen" || ( "$1" == "auto" && "$2" == "--fullscreen" ) ]]; then
-					if [[ "$save" == true ]]; then
+					if [[ "$videosave" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'Started' -a "VNREZ Recorder"
@@ -345,7 +381,7 @@ else
 					"$recorder_command" --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --geometry "$region" --audio="$(getaudiooutput)" -r $fps &
 					disown
 				elif [[ "$1" == "--fullscreen-sound" || ( "$1" == "auto" && "$2" == "--fullscreen-sound" ) ]]; then
-					if [[ "$save" == true ]]; then
+					if [[ "$videosave" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'Started' -a "VNREZ Recorder"
@@ -353,7 +389,7 @@ else
 					"$recorder_command" -o $(getactivemonitor) --pixel-format $pixelformat -c "$encoder" -p preset=$preset -p crf=$crf -f './recording_'"$(getdate)"'.mp4' --audio="$(getaudiooutput)" -r $fps &
 					disown
 				elif [[ "$1" == "--fullscreen" || ( "$1" == "auto" && "$2" == "--fullscreen" ) ]]; then
-					if [[ "$save" == true ]]; then
+					if [[ "$videosave" == true ]]; then
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'recording_'"$(getdate)"'.mp4' -a "VNREZ Recorder"
 					else
 						[[ "$startnotif" == true ]] && notify-send "Starting Recording" 'Started' -a "VNREZ Recorder"

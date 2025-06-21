@@ -33,7 +33,7 @@ upload_video() {
 	elif [[ "$service" == "nest" ]]; then
 		http_code=$(curl -X POST -F "file=@${file}" -H "Authorization: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	elif [[ "$service" == "emogirls" ]]; then
-		http_code=$(curl -X POST -F "file=@${file}" -H "X-API-Key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
+		http_code=$(curl -X POST -F "${file_form_name}=@${file}" -H "X-API-Key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	else
 		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
 			source "$CONFIG_DIR/services/${service}"

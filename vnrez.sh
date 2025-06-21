@@ -423,11 +423,11 @@ EOL
 	fi
 
 	if [[ "$wlscreenrec" == false || "$XDG_SESSION_TYPE" == "x11" ]]; then
-		echo -e "\e[33mEnter the desired CRF (default is 20):\e[0m"
+		echo -e "\e[33mEnter the desired CRF (default is 30):\e[0m"
 		echo -n "✦ ) "
 		read -r crf
 		sleep 0.1
-		crf=${crf:-20}
+		crf=${crf:-30}
 		while ! [[ "$crf" =~ ^[0-9]+$ ]] || [[ $crf -gt 100 ]]; do
 			echo -e "\e[31mCRF must be a number and cannot exceed 100. Please enter a valid CRF:\e[0m"
 			echo -n "✦ ) "
@@ -1089,24 +1089,19 @@ if [[ -z "$1" || ( "$1" == "auto" && -z "$2" ) ]]; then
 
 	tput cnorm
 	if [[ "$choice" == "record" ]]; then
-		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
-			if [[ "$sub_choice" != "abort" ]]; then
-				"$SCRIPT_DIR/components/record.sh" auto
-				sleep 0.2
-				exec "$0" "$@"
+		acquire_lock
+		if [[ ( "$1" == "auto" && "$2" == "--abort" ) || "$2" == "--abort" ]]; then
+			if [[ "$1" == "auto" ]]; then
+				"$SCRIPT_DIR/components/record.sh" "${@:3}"
 			else
-				sleep 0.5
-				"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
+				"$SCRIPT_DIR/components/record.sh" "${@:2}"
 			fi
+		elif [[ "$1" == "auto" ]]; then
+			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
 		else
-			if [[ "$sub_choice" == "none" && "$XDG_SESSION_TYPE" == "wayland" && ("$XDG_CURRENT_DESKTOP" == "GNOME" || "$XDG_CURRENT_DESKTOP" == "KDE" || "$XDG_CURRENT_DESKTOP" == "COSMIC" || "$XDG_CURRENT_DESKTOP" == "X-Cinnamon") ]]; then
-				sleep 0.5
-				"$SCRIPT_DIR/components/record.sh" &>/dev/null
-			else
-				sleep 0.5
-				"$SCRIPT_DIR/components/record.sh" "--$sub_choice" &>/dev/null
-			fi
+			"$SCRIPT_DIR/components/record.sh" "${@:2}"
 		fi
+		release_lock
 	elif [[ "$choice" == "shot" ]]; then
 		acquire_lock
 		if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" && "$grimshot" == true && "$blast" == true ]]; then
@@ -1217,23 +1212,18 @@ if [[ "$1" == "record" || ( "$1" == "auto" && "$2" == "record" ) ]]; then
 		else
 			"$SCRIPT_DIR/components/record.sh" "${@:2}"
 		fi
-	elif [[ ( "$1" == "auto" && "$2" == "record" ) || "$2" == "record" && ! -f "$CONFIG_FILE" ]]; then
+	elif [[ "$1" == "auto" ]]; then
 		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
 			"$SCRIPT_DIR/components/record.sh" auto
-			release_lock
-			exit 0
 		else
-			if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
-				"$SCRIPT_DIR/components/record.sh"
-				release_lock
-				exit 0
-			fi
-		fi
-		if [[ ( "$1" == "auto" && "$2" == "record" ) || "$2" == "record" && ! -f "$CONFIG_FILE" ]]; then
 			"$SCRIPT_DIR/components/record.sh" auto "${@:3}"
 		fi
 	else
-		"$SCRIPT_DIR/components/record.sh" "${@:2}"
+		if pgrep -x ffmpeg >/dev/null || pgrep -x wf-recorder >/dev/null || pgrep -x wl-screenrec >/dev/null || pgrep -x kooha >/dev/null; then
+			"$SCRIPT_DIR/components/record.sh"
+		else
+			"$SCRIPT_DIR/components/record.sh" "${@:2}"
+		fi
 	fi
 	release_lock
 fi
