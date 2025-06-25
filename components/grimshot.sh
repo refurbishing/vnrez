@@ -36,7 +36,7 @@ killHyprpicker() {
   fi
 }
 
-if [[ "$1" == "--area" || "$1" == "--freeze" || "$1" == "shot" || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "shot" && "$2" == "--freeze" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) || -z "$1" ]]; then
+if [[ "$1" == "--area" || "$1" == "--freeze" || ( "$1" == "shot" && "$2" == "--area" ) || ( "$1" == "shot" && "$2" == "--freeze" ) || ( "$1" == "auto" && "$2" == "shot" && "$3" == "--area" ) || ( "$1" == "auto" && "$2" == "shot" && "$3" == "--freeze" ) ]]; then
     if [[ "$1" == "--freeze" || "$2" == "--freeze" || "$3" == "--freeze" ]]; then 
         if [[ "$XDG_CURRENT_DESKTOP" == "Hyprland" || $(command -v hyprpicker &> /dev/null) ]]; then
             hyprpicker -r -z &
@@ -61,7 +61,7 @@ if [[ "$1" == "--area" || "$1" == "--freeze" || "$1" == "shot" || ( "$1" == "sho
         fi
     fi
 
-elif [[ "$1" == "--screen" || "$2" == "--screen" || ( "$1" == "shot" && "$2" == "--screen" ) || ( "$1" == "auto" && "$2" == "shot" && "$3" == "--screen" ) ]]; then
+elif [[ "$1" == "--screen" || "$1" == "shot" || ( "$1" == "shot" && "$2" == "--screen" ) || ( "$1" == "auto" && "$2" == "shot" && -z "$3" ) || ( "$1" == "auto" && "$2" == "shot" && "$3" == "--screen" ) || -z "$1" ]]; then
     grim -o "$(getactivemonitor)" -t png "$temp_file"
 fi
 
