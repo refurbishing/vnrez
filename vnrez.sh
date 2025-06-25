@@ -26,7 +26,7 @@ check_dependencies
 
 initial_setup() {
 	echo -e "Initializing.."
-	services=("e-z" "nest" "emogirls" "custom" "none")
+	services=("e-z" "nest" "custom" "none")
 	selected=0
 
 	find "$SCRIPT_DIR/components" -type f -exec chmod +x {} \;
@@ -799,7 +799,7 @@ fi
 
 if [[ "$1" == "add" || ( "$1" == "auto" && "$2" == "add" ) ]]; then
 	if [[ -f "$CONFIG_FILE" && "$service" != "none" && -n "$service" ]]; then
-		echo -e "\e[33mIs the host you want to add one of the following: nest, e-z, or emogirls? (Y/N):\e[0m"
+		echo -e "\e[33mIs the host you want to add one of the following: nest, e-z? (Y/N):\e[0m"
 		echo -n "✦ ) "
 		read -r is_special_host
 		if [[ "$is_special_host" =~ ^([Yy]|[Yy][Ee][Ss])$ ]]; then

@@ -9,11 +9,6 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
-if [ "$service" = "emogirls" ]; then
-	echo "emogir.ls doesn't support URL shortening as of yet."
-	exit 1
-fi
-
 manage_service() {
     check_systemd
     

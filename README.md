@@ -46,7 +46,6 @@ Go to your prefered terminal and execute this command depending on your Distro.
 By default you can use these:
 - [e-z](https://e-z.host)
 - [nest](https://nest.rip)
-- [emogir.ls](https://emogir.ls)
 
 You can always just use the **custom** option which will allow all json image hosts uploaders.
 or you could just choose **none** which will just copy the file directly to your clipboard

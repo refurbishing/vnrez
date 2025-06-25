@@ -32,8 +32,6 @@ upload_video() {
 		http_code=$(curl -X POST -F "file=@${file}" -H "key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	elif [[ "$service" == "nest" ]]; then
 		http_code=$(curl -X POST -F "file=@${file}" -H "Authorization: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
-	elif [[ "$service" == "emogirls" ]]; then
-		http_code=$(curl -X POST -F "${file_form_name}=@${file}" -H "X-API-Key: ${auth}" -w "%{http_code}" -o $response_video -s "${url}")
 	else
 		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
 			source "$CONFIG_DIR/services/${service}"
@@ -66,12 +64,6 @@ upload_video() {
 
 	if [[ "$service" == "e-z" ]]; then
 		success=$(jq -r ".success" <$response_video)
-	elif [[ "$service" == "emogirls" ]]; then
-		if [[ "$http_code" -eq 200 && "$success" == "null" ]]; then
-			success="true"
-		elif [[ "$http_code" -eq 400 && "$success" == "null" ]]; then
-			success="false"
-		fi
 	elif [[ "$service" == "nest" ]]; then
 		success=$(jq -r ".success" <$response_video)
 		if [[ "$http_code" -eq 200 && "$success" == "null" ]]; then
@@ -120,8 +112,6 @@ upload_video() {
 		file_url=$(jq -r ".imageUrl" <$response_video)
 	elif [[ "$service" == "nest" ]]; then
 		file_url=$(jq -r ".fileURL" <$response_video)
-	elif [[ "$service" == "emogirls" ]]; then
-		file_url=$(jq -r ".url" <$response_video)
 	else
 		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
 			source "$CONFIG_DIR/services/${service}"
@@ -321,8 +311,6 @@ upload_shot() {
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "key: "$auth -w "%{http_code}" -o $response -s "$url")
 	elif [[ "$service" == "nest" ]]; then
 		upload_image=$(curl -X POST -F "file=@"$temp_file -H "Authorization: "$auth -w "%{http_code}" -o $response -s "$url")
-	elif [[ "$service" == "emogirls" ]]; then
-		upload_image=$(curl -X POST -F "file=@"$temp_file -H "X-API-Key: "$auth -w "%{http_code}" -o $response -s "$url")
 	else
 		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
 			source "$CONFIG_DIR/services/${service}"
@@ -415,8 +403,6 @@ upload_shot() {
 		image_url=$(cat $response | jq -r .imageUrl)
 	elif [[ "$service" == "nest" ]]; then
 		image_url=$(cat $response | jq -r .fileURL)
-	elif [[ "$service" == "emogirls" ]]; then
-		image_url=$(cat $response | jq -r .url)
 	else
 		if [[ -f "$CONFIG_DIR/services/${service}" ]]; then
 			source "$CONFIG_DIR/services/${service}"
