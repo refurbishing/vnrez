@@ -113,9 +113,9 @@ handle_upload_response() {
 			upload_url=$(jq -r ".fileURL" <$response_video)
 		fi
 		if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
-			echo "$upload_url" | xclip -selection clipboard
+			echo "$upload_url" | xclip -selection clipboard -rmlastnl
 		else
-			echo "$upload_url" | wl-copy
+			echo "$upload_url" | wl-copy -n
 		fi
 		processed_files["$file_key"]=1
 	fi

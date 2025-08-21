@@ -107,9 +107,9 @@ takeScreenshot() {
 if [[ "$service" == "none" ]]; then
 	[[ "$endnotif" == true ]] && notify-send "Image copied to clipboard" -a "grimshot" -i $temp_file
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-		cat $temp_file | wl-copy
+		cat $temp_file | wl-copy -n
 	else
-		cat $temp_file | xclip -sel c
+		cat $temp_file | xclip -sel c -rmlastnl
 	fi
 	rm $temp_file
 	exit 0

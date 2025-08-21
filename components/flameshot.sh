@@ -29,9 +29,9 @@ if [[ "$1" == "auto" && ! -f "$CONFIG_FILE" ]]; then
 fi
 
 if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-	clipboard_tool="wl-copy"
+	clipboard_tool="wl-copy -n"
 else
-	clipboard_tool="xclip"
+	clipboard_tool="xclip -rmlastnl"
 fi
 
 if [[ -z "$1" || "$1" == "--gui" || "$2" == "--gui" || (-z "$2" || "$1" == "auto") ]]; then
@@ -57,9 +57,9 @@ fi
 if [[ "$service" == "none" ]]; then
 	[[ "$endnotif" == true ]] && notify-send "Image copied to clipboard" -a "Flameshot" -i $temp_file
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-		cat $temp_file | wl-copy
+		cat $temp_file | wl-copy -n
 	else
-		cat $temp_file | xclip -sel c
+		cat $temp_file | xclip -sel c -rmlastnl
 	fi
 	rm $temp_file
 	exit 0

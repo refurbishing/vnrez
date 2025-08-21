@@ -9,6 +9,41 @@ if [ -f "$CONFIG_FILE" ]; then
 	source "$CONFIG_FILE"
 fi
 
+is_shortened_url() {
+    local url="$1"
+    
+    local domain_part=$(echo "$url" | sed -E 's|^https?://([^/]+).*|\1|')
+    
+    if [[ "$domain_part" =~ ^.*nest\.rip$ ]]; then
+        return 1
+    fi
+    
+    if [ -n "$domain" ] && [ "$domain" != "nest.rip" ]; then
+        if [[ "$domain_part" == "$domain" ]]; then
+            return 0
+        fi
+    fi
+    
+    if [ -n "$subdomain" ] && [ -n "$domain" ] && [ "$domain" != "nest.rip" ]; then
+        if [[ "$domain_part" == "$subdomain.$domain" ]]; then
+            return 0
+        fi
+    fi
+        
+    local base_domain=$(echo "$domain_part" | sed -E 's/^[^.]*\.//')
+    local domain_name=$(echo "$base_domain" | sed -E 's/\.[^.]*$//')
+    
+    if [ ${#domain_name} -le 4 ]; then
+        local path=$(echo "$url" | sed -E 's|^https?://[^/]+(/.*)?$|\1|')
+        
+        if [[ "$path" =~ ^/[a-zA-Z0-9_-]{1,12}/?$ ]] || [ "$path" = "/" ] || [ -z "$path" ]; then
+            return 0
+        fi
+    fi
+    
+    return 1
+}
+
 manage_service() {
     check_systemd
     
@@ -82,27 +117,33 @@ case $1 in
         ;;
     --daemon)
         create_service
-        last_original_url=""
-        last_shortened_url=""
+        
+        last_clip=""
+        last_shortened=""
+        
         while true; do
             current_clip=""
             if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-                current_clip=$(wl-paste 2>/dev/null || echo "")
+                current_clip=$(wl-paste 2>/dev/null | tr -d '\0' || echo "")
             else
-                current_clip=$(xclip -selection clipboard -o 2>/dev/null || echo "")
+                current_clip=$(xclip -selection clipboard -o 2>/dev/null | tr -d '\0' || echo "")
             fi
             
             if [ -n "$current_clip" ] && 
                [[ $current_clip =~ ^https?://((([a-zA-Z0-9][-a-zA-Z0-9]*)|([a-zA-Z0-9][-a-zA-Z0-9]*\.)+[a-zA-Z0-9][-a-zA-Z0-9]*)|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]+)?(/[^[:space:]]*)?$ ]] && 
-               [ "$current_clip" != "$last_original_url" ] && 
-               [ "$current_clip" != "$last_shortened_url" ] && 
+               [ "$current_clip" != "$last_clip" ] && 
+               [ "$current_clip" != "$last_shortened" ] && 
                [ "$service" != "none" ] &&
-               ! [[ $current_clip =~ [[:space:]] ]]; then
+               ! [[ $current_clip =~ [[:space:]] ]] &&
+               ! is_shortened_url "$current_clip"; then
                 
                 result=$(shorten_url "$current_clip")
                 if [ $? -eq 0 ] && [ -n "$result" ]; then
-                    last_shortened_url=$(echo "$result" | tail -n1)
-                    last_original_url="$current_clip"
+                    shortened_url=$(echo "$result" | grep -o 'https\?://[^[:space:]]*' | tail -n1)
+                    if [ -n "$shortened_url" ]; then
+                        last_shortened="$shortened_url"
+                    fi
+                    last_clip="$current_clip"
                     sleep 5
                 else
                     sleep 2
@@ -117,6 +158,10 @@ case $1 in
             printf "\033[1;5;31mERROR:\033[0m No URL or Argument provided\n"
             exit 1
         elif [[ $1 =~ ^https?:// ]]; then
+            if is_shortened_url "$1"; then
+                printf "\033[1;33mWARNING:\033[0m URL appears to already be shortened: \033[1;34m$1\033[0m\n"
+                exit 1
+            fi
             shorten_url "$1"
         elif [[ $1 =~ ^[a-zA-Z0-9][-a-zA-Z0-9]*(\.[a-zA-Z0-9][-a-zA-Z0-9]*)+$ ]]; then
             shorten_url "https://$1"

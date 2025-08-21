@@ -18,10 +18,10 @@ upload_video() {
 	if [[ "$service" == "none" ]]; then
 		if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
 			file_path=$(realpath "$file")
-			echo -n "file://$file_path" | wl-copy -t text/uri-list
+			echo -n "file://$file_path" | wl-copy -n -t text/uri-list
 		else
 			file_path=$(realpath "$file")
-			echo -n "file://$file_path" | xclip -selection clipboard -t text/uri-list
+			echo -n "file://$file_path" | xclip -selection clipboard -t text/uri-list -rmlastnl
 		fi
 		[[ "$endnotif" == true ]] && notify-send "Video copied to clipboard" -a "VNREZ Recorder"
 		exit 0
@@ -124,9 +124,9 @@ upload_video() {
 			echo $(date +%s) >"$(eval echo $kooha_last_time)"
 		fi
 		if [[ "$XDG_SESSION_TYPE" == "x11" ]]; then
-			echo "$file_url" | xclip -selection clipboard
+			echo "$file_url" | xclip -selection clipboard -rmlastnl
 		else
-			echo "$file_url" | wl-copy
+			echo "$file_url" | wl-copy -n
 		fi
 			if [[ "$videosave" == true && "$upload_mode" != true ]]; then
 			mkdir -p "$(eval echo $videodir)" 2>/dev/null
@@ -182,7 +182,7 @@ upload_kooha() {
 					file_count=0
 					for file_path in $new_files; do
 						let file_count=file_count+1
-						echo -n "file://$(realpath "$file_path")" | wl-copy -t text/uri-list
+						echo -n "file://$(realpath "$file_path")" | wl-copy -n -t text/uri-list
 						if [[ $(echo $new_files | wc -w) -gt 1 ]]; then
 							[[ "$endnotif" == true ]] && notify-send "#$file_count Recording uploaded" "$file_count of $(echo $new_files | wc -w) URLs have been copied." -a "VNREZ Recorder"
 						else
@@ -411,9 +411,9 @@ upload_shot() {
 	fi
 
 	if [[ "$XDG_SESSION_TYPE" == "wayland" ]]; then
-		echo $image_url | wl-copy
+		echo $image_url | wl-copy -n
 	else
-		echo $image_url | xclip -sel c
+		echo $image_url | xclip -sel c -rmlastnl
 	fi
 	
 	if [[ "$photosave" == true ]]; then
@@ -485,9 +485,9 @@ shorten_url() {
         notify-send "Rate Limited" "You are being rate limited. Please try again later."
     elif [ -n "$shortened_url" ] && [ "$shortened_url" != "null" ]; then
         if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
-            echo "$shortened_url" | wl-copy
+            echo "$shortened_url" | wl-copy -n
         else
-            echo "$shortened_url" | xclip -selection clipboard
+            echo "$shortened_url" | xclip -selection clipboard -rmlastnl
         fi
         [[ "$shortener_notif" == true ]] && notify-send "URL Shortened" "$shortened_url"
         echo "Successfully shortened URL: $shortened_url"
